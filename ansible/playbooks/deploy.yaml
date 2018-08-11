@@ -1,0 +1,29 @@
+# Create Droplet from image provided by Digital Ocean. Disable SSH access for root. Create user with sudo privileges and who must use SSH key to log in. Make sure SSH key(s) are added to Droplet and Digital Ocean account.
+
+# Upgrade operating system to latest version. Enable automatic security updates.
+
+# Install Nginx, Java, Git and Postgres.
+
+# Configure Nginx with SSL support (certificate from Let's Encrypt)
+
+# Configure Postgres
+
+# Download appliation(s) using "git clone".
+
+# Build application(s)
+
+# If other Droplet exists: Copy data from it.
+
+# Start application(s)
+
+# Run integration tests
+
+# Open firewall to allow http, https and ssh to the Droplet.
+
+# Send status mail
+
+# If other Droplet exists: Point DNS or Floting IP to new Droplet.
+
+# If other Droplet exists: Take snapshot of old Droplet.
+
+# If other Droplet exists: Delete old Droplet.
