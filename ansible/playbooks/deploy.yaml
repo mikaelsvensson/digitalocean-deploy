@@ -2,6 +2,10 @@
 - hosts: local
   gather_facts: false
   become: false
+
+  vars:
+    ssh_known_hosts_file: "{{ lookup('env','HOME') + '/.ssh/known_hosts' }}"
+
   tasks:
     - name: Create Droplet from image provided by Digital Ocean.
       digital_ocean:
@@ -27,14 +31,9 @@
 #    - debug:
 #        msg: "IP is {{ do_droplet.droplet.ip_address }}"
 
-#    - name: Wait for SSH to be active
-#      wait_for:
-#        host: "{{ do_droplet.droplet.ip_address }}"
-#        port: 22
-#        delay: 5
-#        sleep: 5
-#        timeout: 300
-#        state: started
+    # Source: https://stackoverflow.com/a/35213839
+    - name: Add SSH fingerprint of new Droplet to list of known hosts
+      shell: ssh-keyscan -H {{ do_droplet.droplet.ip_address }} >> {{ ssh_known_hosts_file }}
 
     - name: Add host for new Droplet
       add_host:
@@ -53,6 +52,9 @@
     - name: Install Java
       include_role:
         name: java
+    - name: Install PostgreSQL
+      include_role:
+        name: postgres
 #    - name: Install Git and Postgres.
 #    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
 #    - name: Configure Postgres

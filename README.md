@@ -36,6 +36,12 @@ List Droplet regions:
 
     $ doctl compute region list
 
+## Connecting to database
+
+Connect to Droplet over SSH and the run this command (connects to "app" database as user "app"):
+
+    $ psql -U app -h 127.0.0.1 app
+
 ## Helpful Links
 
 https://docs.ansible.com/ansible/2.5/modules/list_of_cloud_modules.html?highlight=digital_ocean

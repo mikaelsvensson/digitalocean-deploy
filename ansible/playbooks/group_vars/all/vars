@@ -7,3 +7,6 @@ digitalocean_ssh_pub_keys: "{{ vault_digitalocean_ssh_pub_keys }}"
 digitalocean_sudo_user: "{{ vault_digitalocean_sudo_user }}"
 digitalocean_sudo_password: "{{ vault_digitalocean_sudo_password }}"
 ansible_become_pass: "{{ vault_digitalocean_sudo_password }}"
+app_db_name: app
+app_db_user_name: app
+app_db_user_pw: "{{ vault_app_db_user_pw }}"
