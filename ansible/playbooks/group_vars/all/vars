@@ -1,0 +1,9 @@
+---
+digitalocean_image_id: ubuntu-18-04-x64
+digitalocean_size_id: s-1vcpu-1gb
+digitalocean_region: ams3
+digitalocean_api_key: "{{ vault_digitalocean_api_key }}"
+digitalocean_ssh_pub_keys: "{{ vault_digitalocean_ssh_pub_keys }}"
+digitalocean_sudo_user: "{{ vault_digitalocean_sudo_user }}"
+digitalocean_sudo_password: "{{ vault_digitalocean_sudo_password }}"
+ansible_become_pass: "{{ vault_digitalocean_sudo_password }}"

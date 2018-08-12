@@ -1,29 +1,70 @@
-# Create Droplet from image provided by Digital Ocean. Disable SSH access for root. Create user with sudo privileges and who must use SSH key to log in. Make sure SSH key(s) are added to Droplet and Digital Ocean account.
+---
+- hosts: local
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Create Droplet from image provided by Digital Ocean.
+      digital_ocean:
+        state: present
+        api_token: "{{ digitalocean_api_key }}"
+        backups_enabled: no
+        image_id: "{{ digitalocean_image_id }}"
+        ipv6: no
+        name: default
+        private_networking: yes
+        region_id: "{{ digitalocean_region }}"
+        size_id: "{{ digitalocean_size_id }}"
+        ssh_key_ids: "{{ digitalocean_ssh_pub_keys }}"
+        wait: yes
+        wait_timeout: 300
+        unique_name: yes
+        user_data: "{{ lookup('template', 'files/initial_server_setup.sh') }}"
+      register: do_droplet
 
-# Upgrade operating system to latest version. Enable automatic security updates.
+#    - debug:
+#        msg: "ID is {{ do_droplet.droplet.id }}"
+#
+#    - debug:
+#        msg: "IP is {{ do_droplet.droplet.ip_address }}"
 
-# Install Nginx, Java, Git and Postgres.
+#    - name: Wait for SSH to be active
+#      wait_for:
+#        host: "{{ do_droplet.droplet.ip_address }}"
+#        port: 22
+#        delay: 5
+#        sleep: 5
+#        timeout: 300
+#        state: started
 
-# Configure Nginx with SSL support (certificate from Let's Encrypt)
+    - name: Add host for new Droplet
+      add_host:
+        hostname: "{{ do_droplet.droplet.ip_address }}"
+        groupname: digitalocean
 
-# Configure Postgres
+- hosts: digitalocean
+  gather_facts: false
+  remote_user: "{{ digitalocean_sudo_user }}"
+  become: true
+  tasks:
+#    - name: Upgrade operating system to latest version. Enable automatic security updates.
+    - name: Nginx - Copy install script
+      template:
+        src: files/install_nginx.sh
+        dest: /root/install_nginx.sh
+        mode: 0755
+    - name: Nginx - Install
+      command: /root/install_nginx.sh
 
-# Download appliation(s) using "git clone".
-
-# Build application(s)
-
-# If other Droplet exists: Copy data from it.
-
-# Start application(s)
-
-# Run integration tests
-
-# Open firewall to allow http, https and ssh to the Droplet.
-
-# Send status mail
-
-# If other Droplet exists: Point DNS or Floting IP to new Droplet.
-
-# If other Droplet exists: Take snapshot of old Droplet.
-
-# If other Droplet exists: Delete old Droplet.
+#    - name: Install Java, Git and Postgres.
+#    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
+#    - name: Configure Postgres
+#    - name: Download appliation(s) using "git clone".
+#    - name: Build application(s)
+#    - name: If other Droplet exists; Copy data from it.
+#    - name: Start application(s)
+#    - name: Run integration tests
+#    - name: Open firewall to allow http, https and ssh to the Droplet.
+#    - name: Send status mail
+#    - name: If other Droplet exists; Point DNS or Floting IP to new Droplet.
+#    - name: If other Droplet exists; Take snapshot of old Droplet.
+#    - name: If other Droplet exists; Delete old Droplet.
