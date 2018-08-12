@@ -1,0 +1,8 @@
+---
+- name: Java - Copy install script
+  template:
+    src: install_java.sh
+    dest: /root/install_java.sh
+    mode: 0755
+- name: Java - Install
+  command: /root/install_java.sh

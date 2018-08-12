@@ -50,7 +50,10 @@
     - name: Install Nginx
       include_role:
         name: nginx
-#    - name: Install Java, Git and Postgres.
+    - name: Install Java
+      include_role:
+        name: java
+#    - name: Install Git and Postgres.
 #    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
 #    - name: Configure Postgres
 #    - name: Download appliation(s) using "git clone".
