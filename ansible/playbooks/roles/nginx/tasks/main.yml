@@ -1,0 +1,8 @@
+---
+- name: Nginx - Copy install script
+  template:
+    src: install_nginx.sh
+    dest: /root/install_nginx.sh
+    mode: 0755
+- name: Nginx - Install
+  command: /root/install_nginx.sh

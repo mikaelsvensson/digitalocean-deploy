@@ -47,14 +47,9 @@
   become: true
   tasks:
 #    - name: Upgrade operating system to latest version. Enable automatic security updates.
-    - name: Nginx - Copy install script
-      template:
-        src: files/install_nginx.sh
-        dest: /root/install_nginx.sh
-        mode: 0755
-    - name: Nginx - Install
-      command: /root/install_nginx.sh
-
+    - name: Install Nginx
+      include_role:
+        name: nginx
 #    - name: Install Java, Git and Postgres.
 #    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
 #    - name: Configure Postgres
