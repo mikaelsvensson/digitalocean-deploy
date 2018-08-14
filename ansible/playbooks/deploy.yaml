@@ -55,6 +55,12 @@
     - name: Install PostgreSQL
       include_role:
         name: postgres
+    - name: Install Git
+      include_role:
+        name: git
+    - name: Install Maven
+      include_role:
+        name: maven
 #    - name: Install Git and Postgres.
 #    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
 #    - name: Configure Postgres
