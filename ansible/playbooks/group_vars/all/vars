@@ -10,3 +10,15 @@ ansible_become_pass: "{{ vault_digitalocean_sudo_password }}"
 app_db_name: app
 app_db_user_name: app
 app_db_user_pw: "{{ vault_app_db_user_pw }}"
+app_jdbc_database_url: jdbc:postgresql://localhost:5432/app
+app_port: 8080
+app_google_client_id: "{{ vault_app_google_client_id }}"
+app_google_client_secret: "{{ vault_app_google_client_secret }}"
+app_microsoft_client_id: "{{ vault_app_microsoft_client_id }}"
+app_microsoft_client_secret: "{{ vault_app_microsoft_client_secret }}"
+app_jwt_signing_secret: "{{ vault_app_jwt_signing_secret }}"
+app_smtp_host: "{{ vault_app_smtp_host }}"
+app_smtp_port: "{{ vault_app_smtp_port }}"
+app_smtp_username: "{{ vault_app_smtp_username }}"
+app_smtp_password: "{{ vault_app_smtp_password }}"
+app_smtp_from: "{{ vault_app_smtp_from }}"
