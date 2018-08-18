@@ -1,9 +1,3 @@
 ---
-- name: Java - Copy install script
-  template:
-    src: install_java.sh
-    dest: /root/install_java.sh
-    # TODO: Why not 0700 as the permisson here?
-    mode: 0755
 - name: Java - Install
-  command: /root/install_java.sh
+  script: install_java.sh

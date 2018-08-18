@@ -1,22 +1,11 @@
 ---
-# TODO: Use the "script" module instead of "copy" and "command".
-- name: Nginx - Copy install script
-  copy:
-    src: install_nginx.sh
-    dest: /root/install_nginx.sh
-    mode: 0755
 - name: Nginx - Install
-  command: /root/install_nginx.sh
+  script: install_nginx.sh
 - name: Nginx - Copy configuration
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
     mode: 0644
 # TODO: Configure Nginx with SSL support (certificate from Let's Encrypt)
-- name: Nginx - Copy restart script
-  copy:
-    src: restart_nginx.sh
-    dest: /root/restart_nginx.sh
-    mode: 0755
 - name: Nginx - Restart
-  command: /root/restart_nginx.sh
+  script: restart_nginx.sh
