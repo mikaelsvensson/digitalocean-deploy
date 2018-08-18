@@ -2,7 +2,57 @@
 - hosts: local
   gather_facts: false
   become: false
+  vars:
+    ssh_known_hosts_file: "{{ lookup('env','HOME') + '/.ssh/known_hosts' }}"
+    deploy_id: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
   tasks:
+    - name: Get information about distributions
+      uri:
+        url: https://api.digitalocean.com/v2/images?page=1&per_page=1000&type=distribution
+        method: GET
+        headers:
+          Authorization: "Bearer {{ digitalocean_api_key }}"
+          Content-Type: "application/json"
+      register: distributions
+
+#    - name: Print stuff
+#      debug:
+#        msg: "{{ distributions }}"
+
+    - name: Get slug of latest Ubuntu distribution
+      set_fact:
+        # Need to_json and from_json to avoid type checking issue. See https://github.com/ansible/ansible/issues/27299#issuecomment-331068246
+        digitalocean_image_id: "{{ distributions | to_json | from_json | json_query('sort_by(json.images[?distribution==`Ubuntu` && contains(regions, `'+digitalocean_region+'`) && contains(slug, `x64`)], &slug)[-1].slug') }}"
+
+    - debug:
+        msg: "Image slug for newest Ubuntu distribution is {{ digitalocean_image_id }}"
+
+    - name: Get information about existing Droplets
+      uri:
+        url: https://api.digitalocean.com/v2/droplets
+        method: GET
+        headers:
+          Authorization: "Bearer {{ digitalocean_api_key }}"
+          Content-Type: "application/json"
+      register: existing_droplets
+
+    - name: Read IP addresses of existing Droplet
+      set_fact:
+        old_droplet_ip: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`private`].ip_address') | first }}"
+        old_droplet_ip_public: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`public`].ip_address') | first }}"
+
+    - debug:
+        msg: "Internal IP address of pre-existing Droplet is {{ old_droplet_ip }} and the public is {{ old_droplet_ip_public }}"
+
+    # Source: https://stackoverflow.com/a/35213839
+    - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
+      shell: "ssh-keyscan -H {{ old_droplet_ip_public }} >> {{ ssh_known_hosts_file }}"
+
+    - name: Add host for old Droplet
+      add_host:
+        hostname: "{{ old_droplet_ip_public }}"
+        groupname: digitalocean_old
+
     - name: Get application source code
       git:
         repo: https://github.com/mikaelsvensson/achievements.git
@@ -13,14 +63,6 @@
       args:
           chdir: ./temp/achievements/gui-application
 
-- hosts: local
-  gather_facts: false
-  become: false
-
-  vars:
-    ssh_known_hosts_file: "{{ lookup('env','HOME') + '/.ssh/known_hosts' }}"
-
-  tasks:
     - name: Create Droplet from image provided by Digital Ocean.
       digital_ocean:
         state: present
@@ -28,14 +70,14 @@
         backups_enabled: no
         image_id: "{{ digitalocean_image_id }}"
         ipv6: no
-        name: default
+        name: "default-{{ deploy_id }}"
+        unique_name: yes
         private_networking: yes
         region_id: "{{ digitalocean_region }}"
         size_id: "{{ digitalocean_size_id }}"
         ssh_key_ids: "{{ digitalocean_ssh_pub_keys }}"
         wait: yes
         wait_timeout: 300
-        unique_name: yes
         user_data: "{{ lookup('template', 'files/initial_server_setup.sh') }}"
       register: do_droplet
 
@@ -68,6 +110,45 @@
     - name: Install PostgreSQL
       include_role:
         name: postgres
+    - name: Generate SSH key for user
+      become: no
+      command: "ssh-keygen -t rsa -f ~/.ssh/id_rsa -b 4096 -N {{ '' | quote }}"
+      args:
+        creates: ~/.ssh/id_rsa
+    - name: The public SSH key regular user at existing Droplet
+      become: no
+      slurp:
+        src: ~/.ssh/id_rsa.pub
+      register: public_key_file
+    - name: Get new SSH key
+      set_fact:
+        new_droplet_user_key: "{{ public_key_file['content'] | b64decode }}"
+#    - debug:
+#        msg: "{{ new_droplet_user_key }}"
+
+- hosts: digitalocean_old
+  gather_facts: false
+  remote_user: "{{ digitalocean_sudo_user }}"
+  become: false
+  vars:
+    new_droplet_user_key: "{{ hostvars[groups['digitalocean'][0]].new_droplet_user_key }}"
+  tasks:
+#    - debug:
+#        msg: "Adding the key {{ new_droplet_user_key | quote }}"
+    - name: Enable user on new Droplet to connect to the old Droplet using new user's SSH key
+      shell: "echo {{ new_droplet_user_key | quote }} >> ~/.ssh/authorized_keys"
+
+- hosts: digitalocean
+  gather_facts: false
+  remote_user: "{{ digitalocean_sudo_user }}"
+  become: true
+  vars:
+    old_droplet_ip: "{{ hostvars[groups['local'][0]].old_droplet_ip }}"
+  tasks:
+    # Source: https://stackoverflow.com/a/35213839
+    - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
+      become: no
+      shell: "ssh-keyscan -H {{ old_droplet_ip }} >> ~/.ssh/known_hosts"
     - name: Upload application
       copy:
         src: ./temp/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
@@ -93,9 +174,11 @@
     - name: Start service
       command: ./achievements-start.sh
       become: no
+#    - name: Wait for service to respond to /ping (or similar resource)
 #    - name: Run integration tests
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail
 #    - name: If other Droplet exists; Point DNS or Floting IP to new Droplet.
+#    - name: If other Droplet exists; Shutdown old Droplet.
 #    - name: If other Droplet exists; Take snapshot of old Droplet.
 #    - name: If other Droplet exists; Delete old Droplet.
