@@ -39,12 +39,6 @@
         user_data: "{{ lookup('template', 'files/initial_server_setup.sh') }}"
       register: do_droplet
 
-#    - debug:
-#        msg: "ID is {{ do_droplet.droplet.id }}"
-#
-#    - debug:
-#        msg: "IP is {{ do_droplet.droplet.ip_address }}"
-
     - name: Build the application
       shell: "mvn clean install -DapiHostName=http://{{ do_droplet.droplet.ip_address }}"
       args:
@@ -95,14 +89,10 @@
         owner: "{{ digitalocean_sudo_user }}"
         mode: u=rwx,g=r,o=r
       become: no
+#    - name: If other Droplet exists; Copy data from it.
     - name: Start service
       command: ./achievements-start.sh
       become: no
-#    - name: Configure Nginx with SSL support (certificate from Let's Encrypt)
-#    - name: Download appliation(s) using "git clone".
-#    - name: Build application(s)
-#    - name: If other Droplet exists; Copy data from it.
-#    - name: Start application(s)
 #    - name: Run integration tests
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail
