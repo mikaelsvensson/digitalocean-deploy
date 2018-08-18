@@ -1,8 +1,0 @@
----
-- name: Git - Copy install script
-  template:
-    src: install_git.sh
-    dest: /root/install_git.sh
-    mode: 0755
-- name: Git - Install
-  command: /root/install_git.sh

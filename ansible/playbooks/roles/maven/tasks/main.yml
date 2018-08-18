@@ -1,8 +1,0 @@
----
-- name: Maven - Copy install script
-  template:
-    src: install_maven.sh
-    dest: /root/install_maven.sh
-    mode: 0755
-- name: Maven - Install
-  command: /root/install_maven.sh
