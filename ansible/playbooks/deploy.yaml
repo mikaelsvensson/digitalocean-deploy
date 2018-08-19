@@ -40,18 +40,22 @@
       set_fact:
         old_droplet_ip: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`private`].ip_address') | first }}"
         old_droplet_ip_public: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`public`].ip_address') | first }}"
+      when: existing_droplets.json.meta.total > 0
 
     - debug:
         msg: "Internal IP address of pre-existing Droplet is {{ old_droplet_ip }} and the public is {{ old_droplet_ip_public }}"
+      when: old_droplet_ip is defined
 
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
       shell: "ssh-keyscan -H {{ old_droplet_ip_public }} >> {{ ssh_known_hosts_file }}"
+      when: old_droplet_ip is defined
 
     - name: Add host for old Droplet
       add_host:
         hostname: "{{ old_droplet_ip_public }}"
         groupname: digitalocean_old
+      when: old_droplet_ip is defined
 
     - name: Get application source code
       git:
@@ -143,12 +147,13 @@
   remote_user: "{{ digitalocean_sudo_user }}"
   become: true
   vars:
-    old_droplet_ip: "{{ hostvars[groups['local'][0]].old_droplet_ip }}"
+    old_droplet_ip: "{{ hostvars[groups['local'][0]].old_droplet_ip | default('') }}"
   tasks:
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
       become: no
       shell: "ssh-keyscan -H {{ old_droplet_ip }} >> ~/.ssh/known_hosts"
+      when: old_droplet_ip != ''
     - name: Upload application
       copy:
         src: ./temp/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
