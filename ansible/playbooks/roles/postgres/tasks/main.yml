@@ -6,3 +6,15 @@
     mode: 0666
 - name: Postgres - Install
   script: install_postgres.sh
+- name: Postgres - Create backup directory
+  file:
+    path: "/home/{{ digitalocean_sudo_user }}/database-backups"
+    state: directory
+    owner: "{{ digitalocean_sudo_user }}"
+    group: "{{ digitalocean_sudo_user }}"
+    mode: 0776
+- name: Postgres - Setup daily backups
+  template:
+    src: backup_database.sh
+    dest: "/etc/cron.daily/backup_{{ app_db_name }}_database"
+    mode: 0755
