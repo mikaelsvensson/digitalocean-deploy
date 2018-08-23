@@ -12,6 +12,8 @@ if [ $? -ne 0 ]; then
     # No, Postgresql is not installed. Install it now.
     apt -y -qq install postgresql-9.6
 
+    echo "host    all             all             10.133.0.0/16            md5" >> /etc/postgresql/9.6/main/pg_hba.conf
+
     sudo -u postgres /usr/lib/postgresql/9.6/bin/pg_ctl -D /var/lib/postgresql/9.6/main -l logfile start
 
     sudo -u postgres psql postgres -f /tmp/init_app_database.sql

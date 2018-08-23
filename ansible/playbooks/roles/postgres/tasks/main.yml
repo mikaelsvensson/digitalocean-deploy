@@ -12,7 +12,7 @@
     state: directory
     owner: "{{ digitalocean_sudo_user }}"
     group: "{{ digitalocean_sudo_user }}"
-    mode: 0776
+    mode: 0775
 - name: Postgres - Setup daily backups
   template:
     src: backup_database.sh

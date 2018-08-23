@@ -38,12 +38,14 @@
 
     - name: Read IP addresses of existing Droplet
       set_fact:
+        deploy_id: "{{ deploy_id }}"
+        old_droplet_id: "{{ existing_droplets | json_query('json.droplets[0].id') }}"
         old_droplet_ip: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`private`].ip_address') | first }}"
         old_droplet_ip_public: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`public`].ip_address') | first }}"
       when: existing_droplets.json.meta.total > 0
 
     - debug:
-        msg: "Internal IP address of pre-existing Droplet is {{ old_droplet_ip }} and the public is {{ old_droplet_ip_public }}"
+        msg: "Internal IP address of pre-existing Droplet (id {{ old_droplet_id }}) is {{ old_droplet_ip }} and the public is {{ old_droplet_ip_public }}"
       when: old_droplet_ip is defined
 
     # Source: https://stackoverflow.com/a/35213839
@@ -136,11 +138,15 @@
   become: false
   vars:
     new_droplet_user_key: "{{ hostvars[groups['digitalocean'][0]].new_droplet_user_key }}"
+    deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
 #    - debug:
 #        msg: "Adding the key {{ new_droplet_user_key | quote }}"
     - name: Enable user on new Droplet to connect to the old Droplet using new user's SSH key
       shell: "echo {{ new_droplet_user_key | quote }} >> ~/.ssh/authorized_keys"
+    - name: Create database backup
+      command: "sudo -u postgres pg_dump -U postgres {{ app_db_name }} -F p -f /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
+      become: yes
 
 - hosts: digitalocean
   gather_facts: false
@@ -148,6 +154,7 @@
   become: true
   vars:
     old_droplet_ip: "{{ hostvars[groups['local'][0]].old_droplet_ip | default('') }}"
+    deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
@@ -175,7 +182,18 @@
         owner: "{{ digitalocean_sudo_user }}"
         mode: u=rwx,g=r,o=r
       become: no
-#    - name: If other Droplet exists; Copy data from it.
+    - name: If other Droplet exists; Copy data from it.
+      command: "rsync --verbose --recursive --ignore-existing --perms --owner --group {{ old_droplet_ip }}:/home/{{ digitalocean_sudo_user }}/ /home/{{ digitalocean_sudo_user }}"
+      become: no
+      when: old_droplet_ip != ''
+    - name: If other Droplet exists; Fetch database backup
+      command: "scp {{ old_droplet_ip }}:/tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql /tmp/"
+      become: no
+      when: old_droplet_ip != ''
+    - name: If other Droplet exists; Restore database from backup
+      shell: "sudo -u postgres psql {{ app_db_name }} < /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
+      become: yes
+      when: old_droplet_ip != ''
     - name: Start service
       command: ./achievements-start.sh
       become: no
@@ -186,4 +204,13 @@
 #    - name: If other Droplet exists; Point DNS or Floting IP to new Droplet.
 #    - name: If other Droplet exists; Shutdown old Droplet.
 #    - name: If other Droplet exists; Take snapshot of old Droplet.
-#    - name: If other Droplet exists; Delete old Droplet.
+- hosts: local
+  gather_facts: false
+  become: false
+  tasks:
+    - name: If other Droplet exists; Delete old Droplet.
+      when: old_droplet_ip != ''
+      digital_ocean:
+        state: deleted
+        api_token: "{{ digitalocean_api_key }}"
+        id: "{{ old_droplet_id }}"
