@@ -201,13 +201,23 @@
 #    - name: Run integration tests
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail
-#    - name: If other Droplet exists; Point DNS or Floting IP to new Droplet.
 #    - name: If other Droplet exists; Shutdown old Droplet.
 #    - name: If other Droplet exists; Take snapshot of old Droplet.
 - hosts: local
   gather_facts: false
   become: false
   tasks:
+    - name: Point DNS to new Droplet.
+      uri:
+        url: "https://api.dynu.com/nic/update?hostname=minamarken.dynu.net&myip={{ do_droplet.droplet.ip_address }}"
+        user: "{{ dynu_user }}"
+        password: "{{ dynu_password }}"
+        method: GET
+        force_basic_auth: yes
+#        return_content: yes
+#      register: dynu_updated_response
+#    - debug:
+#        msg: "{{ dynu_updated_response }}"
     - name: If other Droplet exists; Delete old Droplet.
       when: old_droplet_ip != ''
       digital_ocean:
