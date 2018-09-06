@@ -15,4 +15,8 @@ export SMTP_USERNAME="{{ app_smtp_username }}"
 export SMTP_PASSWORD="{{ app_smtp_password }}"
 export SMTP_FROM="{{ app_smtp_from }}"
 
-nohup java -jar achievements-service.jar server achievements-config.yml >achievements-service.log 2>&1 &
+nohup java -Ddw.serverApplicationHost=http://{{ app_host_name }} \
+    -Ddw.guiApplicationHost=http://{{ app_host_name }} \
+    -jar achievements-service.jar \
+    server \
+    achievements-config.yml >achievements-service.log 2>&1 &
