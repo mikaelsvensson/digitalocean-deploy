@@ -5,6 +5,7 @@ digitalocean_api_key: "{{ vault_digitalocean_api_key }}"
 digitalocean_ssh_pub_keys: "{{ vault_digitalocean_ssh_pub_keys }}"
 digitalocean_sudo_user: "{{ vault_digitalocean_sudo_user }}"
 digitalocean_sudo_password: "{{ vault_digitalocean_sudo_password }}"
+digitalocean_floating_ip: 174.138.106.188
 ansible_become_pass: "{{ vault_digitalocean_sudo_password }}"
 app_db_name: app
 app_db_user_name: app
@@ -21,5 +22,6 @@ app_smtp_port: "{{ vault_app_smtp_port }}"
 app_smtp_username: "{{ vault_app_smtp_username }}"
 app_smtp_password: "{{ vault_app_smtp_password }}"
 app_smtp_from: "{{ vault_app_smtp_from }}"
+app_host_name: minamarken.mikaelsvensson.info
 dynu_user: "{{ vault_dynu_user }}"
 dynu_password: "{{ vault_dynu_password }}"
