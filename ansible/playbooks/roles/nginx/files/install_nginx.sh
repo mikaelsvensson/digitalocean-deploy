@@ -9,9 +9,4 @@ if [ $? -ne 0 ]; then
 
     # No, nginx is not installed. Install it now.
     apt -y -qq install nginx
-
-    # Open port 80 and 443 in firewall
-    # TODO: Look into if better to use firewall from Digital Ocean instead.
-    ufw allow 'Nginx Full'
-
 fi

@@ -69,4 +69,9 @@ fi
 
 # Add exception for SSH and then enable UFW firewall
 ufw allow OpenSSH
+
+# Open port 80 and 443 in firewall
+# TODO: Look into if better to use firewall from Digital Ocean instead.
+ufw allow 'Nginx Full'
+
 ufw --force enable

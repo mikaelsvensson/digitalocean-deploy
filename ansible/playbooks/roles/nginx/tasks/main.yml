@@ -1,8 +1,8 @@
 ---
 - name: Nginx - Install
-  script: install_nginx.sh
+  script: "install_nginx.sh {{ app_host_name }}"
 - name: Nginx - Copy configuration
-  copy:
+  template:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
     mode: 0644

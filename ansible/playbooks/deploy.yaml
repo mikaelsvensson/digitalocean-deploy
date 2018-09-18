@@ -92,7 +92,7 @@
         new_droplet_id: "{{ do_droplet.droplet.id }}"
 
     - name: Build the application
-      shell: "mvn clean install -DapiHostName=http://{{ do_droplet.droplet.ip_address }}"
+      shell: "mvn clean install -DapiHostName=https://{{ app_host_name }}"
       args:
           chdir: ./temp/achievements
 
@@ -111,6 +111,9 @@
   become: true
   tasks:
 #    - name: Upgrade operating system to latest version. Enable automatic security updates.
+    - name: Install https certificate tooling
+      include_role:
+        name: certbot
     - name: Install Nginx
       include_role:
         name: nginx
@@ -158,6 +161,7 @@
   become: true
   vars:
     old_droplet_ip: "{{ hostvars[groups['local'][0]].old_droplet_ip | default('') }}"
+    new_droplet_id: "{{ hostvars[groups['local'][0]].new_droplet_id | default('') }}"
     deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
     # Source: https://stackoverflow.com/a/35213839
@@ -202,24 +206,53 @@
       command: ./achievements-start.sh
       become: no
 #    - name: Wait for service to respond to /ping (or similar resource)
+    - name: "Wait for service to become available over http:8080"
+      become: no
+      uri:
+        url: "http://localhost:8080"
+        timeout: 5
+      retries: 10
+      delay: 5
+      register: initial_url_check
+      until: initial_url_check['status']|default(0) == 200
+    - name: "Wait for service to become available over http:80"
+      become: no
+      uri:
+        url: "http://localhost"
+        timeout: 5
 #    - name: Run integration tests
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail
 #    - name: If other Droplet exists; Shutdown old Droplet.
 #    - name: If other Droplet exists; Take snapshot of old Droplet.
+    - name: "Assign floating IP to new Droplet"
+      become: no
+      digital_ocean_floating_ip:
+        state: present
+        ip: "{{ digitalocean_floating_ip }}"
+        droplet_id: "{{ new_droplet_id }}"
+        oauth_token: "{{ digitalocean_api_key }}"
+    - name: "Wait for service to become available over http"
+      uri:
+        url: "http://{{ app_host_name }}"
+        timeout: 5
+    - name: "Start Certbot for Nginx"
+      become: true
+      script: "start_certbot.sh {{ app_host_name }}"
+      retries: 3
+      delay: 10
+      register: start_certbot_result
+      until: start_certbot_result.rc == 0
 - hosts: local
   gather_facts: false
   become: false
   vars:
     new_droplet_id: "{{ hostvars[groups['local'][0]].new_droplet_id | default('') }}"
   tasks:
-    - name: "Assign floating IP to new Droplet"
-      digital_ocean_floating_ip:
-        state: present
-        ip: "{{ digitalocean_floating_ip }}"
-        droplet_id: "{{ new_droplet_id }}"
-        oauth_token: "{{ digitalocean_api_key }}"
-
+    - name: "Wait for service to become available over https"
+      uri:
+        url: "https://{{ app_host_name }}"
+        timeout: 5
 #    - name: Point DNS to new Droplet.
 #      uri:
 #        url: "http://api.dynu.com/nic/update?hostname=minamarken.dynu.net&myip={{ do_droplet.droplet.ip_address }}"
