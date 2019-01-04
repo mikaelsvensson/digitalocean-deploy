@@ -14,9 +14,11 @@ export SMTP_PORT="{{ app_smtp_port }}"
 export SMTP_USERNAME="{{ app_smtp_username }}"
 export SMTP_PASSWORD="{{ app_smtp_password }}"
 export SMTP_FROM="{{ app_smtp_from }}"
+export SENTRY_DSN="{{ app_sentry_dsn }}"
 
 nohup java -Ddw.serverApplicationHost=https://{{ app_host_name }} \
     -Ddw.guiApplicationHost=https://{{ app_host_name }} \
+    -Dsentry.environment=production \
     -jar achievements-service.jar \
     server \
     achievements-config.yml >achievements-service.log 2>&1 &

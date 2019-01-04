@@ -23,5 +23,6 @@ app_smtp_username: "{{ vault_app_smtp_username }}"
 app_smtp_password: "{{ vault_app_smtp_password }}"
 app_smtp_from: "{{ vault_app_smtp_from }}"
 app_host_name: minamarken.mikaelsvensson.info
+app_sentry_dsn: "{{ vault_app_sentry_dsn }}"
 dynu_user: "{{ vault_dynu_user }}"
 dynu_password: "{{ vault_dynu_password }}"
