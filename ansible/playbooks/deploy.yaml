@@ -4,8 +4,20 @@
   become: false
   vars:
     ssh_known_hosts_file: "{{ lookup('env','HOME') + '/.ssh/known_hosts' }}"
-    deploy_id: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    date_slug_cmd: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    random_string_cmd: "{{ lookup('password', '/dev/null length=10 chars=ascii_letters,digits') }}"
   tasks:
+    - name: Set deploy_id
+      when: deploy_id is undefined # deploy_id might have been defined using command-line argument
+      set_fact:
+        deploy_id: "{{ date_slug_cmd }}-{{ random_string_cmd }}"
+    - debug:
+        msg: "deploy_id is {{ deploy_id }}"
+    - name: Build application Achievements
+      when: do_build is undefined or do_build|bool
+      include_role:
+        name: achievements
+        tasks_from: build
     - name: Get information about distributions
       uri:
         url: https://api.digitalocean.com/v2/images?page=1&per_page=1000&type=distribution
@@ -59,16 +71,6 @@
         groupname: digitalocean_old
       when: old_droplet_ip is defined
 
-    - name: Get application source code
-      git:
-        repo: https://github.com/mikaelsvensson/achievements.git
-        dest: ./temp/achievements
-        force: yes
-    - name: Download Node dependencies
-      shell: npm install
-      args:
-          chdir: ./temp/achievements/gui-application
-
     - name: Create Droplet from image provided by Digital Ocean.
       digital_ocean:
         state: present
@@ -90,11 +92,6 @@
     - name: Read id of new Droplet
       set_fact:
         new_droplet_id: "{{ do_droplet.droplet.id }}"
-
-    - name: Build the application
-      shell: "mvn clean install -DapiHostName=https://{{ app_host_name }}"
-      args:
-          chdir: ./temp/achievements
 
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of new Droplet to list of known hosts
@@ -123,6 +120,10 @@
     - name: Install PostgreSQL
       include_role:
         name: postgres
+    - name: Install Achievements server
+      include_role:
+        name: achievements
+        tasks_from: install
     - name: Generate SSH key for user
       become: no
       command: "ssh-keygen -t rsa -f ~/.ssh/id_rsa -b 4096 -N {{ '' | quote }}"
@@ -169,27 +170,6 @@
       become: no
       shell: "ssh-keyscan -H {{ old_droplet_ip }} >> ~/.ssh/known_hosts"
       when: old_droplet_ip != ''
-    - name: Upload application
-      copy:
-        src: ./temp/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
-        dest: ./achievements-service.jar
-        owner: "{{ digitalocean_sudo_user }}"
-        mode: u=rw,g=r,o=r
-      become: no
-    - name: Upload application configuration file
-      copy:
-        src: ./temp/achievements/server-application/environments/heroku.yaml
-        dest: ./achievements-config.yml
-        owner: "{{ digitalocean_sudo_user }}"
-        mode: u=rw,g=r,o=r
-      become: no
-    - name: Upload script for starting application
-      template:
-        src: ./files/start_achievements.sh
-        dest: ./achievements-start.sh
-        owner: "{{ digitalocean_sudo_user }}"
-        mode: u=rwx,g=r,o=r
-      become: no
     - name: If other Droplet exists; Copy data from it.
       command: "rsync --verbose --recursive --ignore-existing --perms --owner --group {{ old_droplet_ip }}:/home/{{ digitalocean_sudo_user }}/ /home/{{ digitalocean_sudo_user }}"
       become: no
@@ -202,25 +182,10 @@
       shell: "sudo -u postgres psql {{ app_db_name }} < /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
       become: yes
       when: old_droplet_ip != ''
-    - name: Start service
-      command: ./achievements-start.sh
-      become: no
-#    - name: Wait for service to respond to /ping (or similar resource)
-    - name: "Wait for service to become available over http:8080"
-      become: no
-      uri:
-        url: "http://localhost:8080"
-        timeout: 5
-      retries: 10
-      delay: 5
-      register: initial_url_check
-      until: initial_url_check['status']|default(0) == 200
-    - name: "Wait for service to become available over http:80"
-      become: no
-      uri:
-        url: "http://localhost"
-        timeout: 5
-#    - name: Run integration tests
+    - name: Start Achievements server
+      include_role:
+        name: achievements
+        tasks_from: start
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail
 #    - name: If other Droplet exists; Shutdown old Droplet.

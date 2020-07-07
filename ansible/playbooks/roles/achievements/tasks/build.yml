@@ -1,0 +1,58 @@
+---
+- name: "[Prepare build] Remove temp directory"
+  file:
+    path: ./temp
+    state: absent
+
+- name: "[Prepare build] Get application source code"
+  git:
+    repo: https://github.com/mikaelsvensson/achievements.git
+    dest: ./temp/achievements
+    force: yes
+
+- name: "[Prepare build] Download Node dependencies"
+  shell: npm install
+  args:
+    chdir: ./temp/achievements/gui-application
+
+- name: "[Build] Build the frontend"
+  shell: npm run build:production
+  args:
+    chdir: ./temp/achievements/gui-application
+
+- name: "[Build] Build the backend"
+  shell: "mvn clean install -DapiHostName=https://{{ app_host_name }}"
+  args:
+    chdir: ./temp/achievements
+
+- name: "[Bundle] Copy frontend"
+  copy:
+    src: ./temp/achievements/gui-application/build/
+    dest: ./temp/bundle/gui
+
+- name: "[Bundle] Create target folder"
+  file:
+    path: ./temp/bundle/server
+    state: directory
+
+- name: "[Bundle] Generate script for starting application"
+  template:
+    src: ./templates/start_achievements.sh
+    dest: ./temp/bundle/server/start.sh
+    mode: u=rwx,g=r,o=r
+
+- name: "[Bundle] Copy backend app"
+  copy:
+    src: ./temp/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
+    dest: ./temp/bundle/server/achievements-service.jar
+
+- name: "[Bundle] Copy backend configuration file"
+  copy:
+    src: ./temp/achievements/server-application/environments/heroku.yaml
+    dest: ./temp/bundle/server/config.yml
+
+- name: "[Bundle] Create archive"
+  archive:
+    path:
+      - ./temp/bundle
+    dest: "./temp/achievements-{{ deploy_id }}.tar.gz"

@@ -1,0 +1,19 @@
+---
+- name: "Copy Nginx configuration for site"
+  become: yes
+  template:
+    src: nginx.conf
+    dest: "/etc/nginx/sites-available/{{app_host_name}}"
+    mode: u=rwx,g=r,o=r
+- name: "Extract site bundle"
+  unarchive:
+    src: "./temp/achievements-{{ deploy_id }}.tar.gz"
+    dest: "/home/{{ digitalocean_sudo_user }}/achievements-bundle"
+- name: "Copy script"
+  template:
+    src: prepare_files.sh
+    dest: "./prepare_files.sh"
+    mode: u=rwx,g=rx,o=rx
+- name: "Fix permissions and copy static assets to Nginx directory"
+  command: "./prepare_files.sh"
+  become: yes
