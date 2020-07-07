@@ -1,11 +1,11 @@
 ---
 - name: Nginx - Install
-  script: "install_nginx.sh {{ app_host_name }}"
-- name: Nginx - Copy configuration
-  template:
+  script: "install_nginx.sh"
+- name: Nginx - Copy main configuration
+  copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
     mode: 0644
-# TODO: Configure Nginx with SSL support (certificate from Let's Encrypt)
+# TODO: Configure Nginx with SSL support (certificate from Let's Encrypt). Done?
 - name: Nginx - Restart
   script: restart_nginx.sh

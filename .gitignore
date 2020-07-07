@@ -1,2 +1,4 @@
 /.idea/
 *.iml
+/ansible/playbooks/temp/
+/database-backups/
