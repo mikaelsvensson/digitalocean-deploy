@@ -1,8 +1,25 @@
 #!/bin/bash
 
-nohup java -Ddw.serverApplicationHost=https://{{ app_host_name }} \
-    -Ddw.guiApplicationHost=https://{{ app_host_name }} \
+PORT=$PORT \
+PORT_TEST=$PORT \
+JDBC_DATABASE_URL=$JDBC_DATABASE_URL \
+JDBC_DATABASE_USERNAME=$JDBC_DATABASE_USERNAME \
+JDBC_DATABASE_PASSWORD=$JDBC_DATABASE_PASSWORD \
+GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
+GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
+MICROSOFT_CLIENT_ID=$MICROSOFT_CLIENT_ID \
+MICROSOFT_CLIENT_SECRET=$MICROSOFT_CLIENT_SECRET \
+JWT_SIGNING_SECRET=$JWT_SIGNING_SECRET \
+SMTP_HOST=$SMTP_HOST \
+SMTP_PORT=$SMTP_PORT \
+SMTP_USERNAME=$SMTP_USERNAME \
+SMTP_PASSWORD=$SMTP_PASSWORD \
+SMTP_FROM=$SMTP_FROM \
+SENTRY_DSN=$SENTRY_DSN \
+BASE_URI_SERVER=https://$APP_HOST_NAME \
+BASE_URI_GUI=https://$APP_HOST_NAME \
+nohup \
+  java \
     -Dsentry.environment=production \
     -jar achievements-service.jar \
-    server \
-    config.yml >service.log 2>&1 &
+    server config.yml > service.log 2>&1 &

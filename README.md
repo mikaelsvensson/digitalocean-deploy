@@ -8,6 +8,7 @@
 0. Install version 0.3.5 of the Python library `dopy` using `pip install -I dopy==0.3.5`.
 0. Install the Python library `six` using `pip install six`.
 0. Install Ansible using `pip install ansible`.
+0. Install jmespath using `pip install jmespath`.
 0. Optional: Install `doctl` from https://github.com/digitalocean/doctl
 
 See https://github.com/ansible/ansible-modules-core/issues/2509 for more information on the specific Python instructions.

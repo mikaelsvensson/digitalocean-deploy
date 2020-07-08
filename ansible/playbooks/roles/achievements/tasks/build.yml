@@ -11,17 +11,19 @@
     force: yes
 
 - name: "[Prepare build] Download Node dependencies"
-  shell: npm install
-  args:
+  shell:
+    cmd: "npm install"
     chdir: ./temp/achievements/gui-application
 
 - name: "[Build] Build the frontend"
-  shell: npm run build:production
-  args:
+  shell:
+    cmd: "npm run build:production"
     chdir: ./temp/achievements/gui-application
+  environment:
+    API_HOST: "https://{{ app_host_name }}"
 
 - name: "[Build] Build the backend"
-  shell: "mvn clean install -DapiHostName=https://{{ app_host_name }}"
+  shell: "mvn clean install"
   args:
     chdir: ./temp/achievements
 
@@ -54,5 +56,5 @@
 - name: "[Bundle] Create archive"
   archive:
     path:
-      - ./temp/bundle
+      - ./temp/bundle/*
     dest: "./temp/achievements-{{ deploy_id }}.tar.gz"
