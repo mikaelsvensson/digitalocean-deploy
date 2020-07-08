@@ -6,6 +6,10 @@
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
     mode: 0644
+- name: Nginx - Deleting default configuration
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
 # TODO: Configure Nginx with SSL support (certificate from Let's Encrypt). Done?
 - name: Nginx - Restart
-  script: restart_nginx.sh
+  command: "sudo systemctl restart nginx"

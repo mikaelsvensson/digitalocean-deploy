@@ -4,7 +4,11 @@
   template:
     src: nginx.conf
     dest: "/etc/nginx/sites-available/{{app_host_name}}"
-    mode: u=rwx,g=r,o=r
+    mode: u=rw,g=r,o=r
+- name: "Create site bundle folder"
+  file:
+    path: "/home/{{ digitalocean_sudo_user }}/achievements-bundle"
+    state: directory
 - name: "Extract site bundle"
   unarchive:
     src: "./temp/achievements-{{ deploy_id }}.tar.gz"
@@ -16,4 +20,7 @@
     mode: u=rwx,g=rx,o=rx
 - name: "Fix permissions and copy static assets to Nginx directory"
   command: "./prepare_files.sh"
+  become: yes
+- name: Nginx - Restart
+  command: "sudo systemctl restart nginx"
   become: yes

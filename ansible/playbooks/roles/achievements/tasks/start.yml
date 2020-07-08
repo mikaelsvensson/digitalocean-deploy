@@ -1,6 +1,8 @@
 ---
 - name: Start service
-  command: ./achievements-bundle/server/start.sh
+  shell:
+    cmd: "./start.sh"
+    chdir: "./achievements-bundle/server"
   become: no
   environment:
     PORT: "{{ app_port }}"
@@ -18,19 +20,40 @@
     SMTP_PASSWORD: "{{ app_smtp_password }}"
     SMTP_FROM: "{{ app_smtp_from }}"
     SENTRY_DSN: "{{ app_sentry_dsn }}"
-#    - name: Wait for service to respond to /ping (or similar resource)
-- name: "Wait for service to become available over http:8080"
+    APP_HOST_NAME: "{{ app_host_name }}"
+
+- name: "Wait for admin API to become available over http:9001"
   become: no
   uri:
-    url: "http://localhost:8080"
-    timeout: 5
+    url: "http://localhost:9001/ping"
+    timeout: 1
+    status_code: [200]
   retries: 10
   delay: 5
-  register: initial_url_check
-  until: initial_url_check['status']|default(0) == 200
-- name: "Wait for service to become available over http:80"
+  register: admin_api_url_check
+  until: admin_api_url_check['status']|default(0) == 200
+
+- name: "Wait for public API to become available over http:8080"
+  become: no
+  uri:
+    url: "http://localhost:8080/api/stats"
+    timeout: 1
+    status_code: [401]
+  retries: 1
+  delay: 5
+  register: public_api_url_check
+  until: public_api_url_check['status']|default(0) == 401 # Yes, 401 is expected but at least it's a proper response
+
+- name: "Check if API is available over http:80 (proxied through Nginx)"
+  become: no
+  uri:
+    url: "http://localhost/api/stats"
+    timeout: 5
+    status_code: [401]
+
+- name: "Check if HTML is available over http:80 (proxied through Nginx)"
   become: no
   uri:
     url: "http://localhost"
     timeout: 5
-#    - name: Run integration tests
+    status_code: [200]
