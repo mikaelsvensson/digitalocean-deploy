@@ -62,7 +62,7 @@
 
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
-      shell: "ssh-keyscan -H {{ old_droplet_ip_public }} >> {{ ssh_known_hosts_file }}"
+      shell: "ssh-keyscan {{ old_droplet_ip_public }} >> {{ ssh_known_hosts_file }}"
       when: old_droplet_ip is defined
 
     - name: Add host for old Droplet
@@ -92,20 +92,27 @@
     - name: Read id of new Droplet
       set_fact:
         new_droplet_id: "{{ do_droplet.droplet.id }}"
-
+    - name: Wait for SSH to become available
+      pause:
+        seconds: 30
     # Source: https://stackoverflow.com/a/35213839
+    - name: Remove new Droplet's IP address from list of known hosts in case that address has previous been used by other Droplet
+      shell: "ssh-keygen -R {{ do_droplet.droplet.networks.v4[1].ip_address }}"
+
     - name: Add SSH fingerprint of new Droplet to list of known hosts
-      shell: ssh-keyscan -H {{ do_droplet.droplet.ip_address }} >> {{ ssh_known_hosts_file }}
+      shell: "ssh-keyscan {{ do_droplet.droplet.networks.v4[1].ip_address }} >> {{ ssh_known_hosts_file }}"
 
     - name: Add host for new Droplet
       add_host:
-        hostname: "{{ do_droplet.droplet.ip_address }}"
+        hostname: "{{ do_droplet.droplet.networks.v4[1].ip_address }}"
         groupname: digitalocean
 
 - hosts: digitalocean
   gather_facts: false
   remote_user: "{{ digitalocean_sudo_user }}"
   become: true
+  vars:
+    deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
 #    - name: Upgrade operating system to latest version. Enable automatic security updates.
     - name: Install https certificate tooling
@@ -168,7 +175,7 @@
     # Source: https://stackoverflow.com/a/35213839
     - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
       become: no
-      shell: "ssh-keyscan -H {{ old_droplet_ip }} >> ~/.ssh/known_hosts"
+      shell: "ssh-keyscan {{ old_droplet_ip }} >> ~/.ssh/known_hosts"
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Copy data from it.
       command: "rsync --verbose --recursive --ignore-existing --perms --owner --group {{ old_droplet_ip }}:/home/{{ digitalocean_sudo_user }}/ /home/{{ digitalocean_sudo_user }}"
