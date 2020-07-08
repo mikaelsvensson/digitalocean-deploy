@@ -1,0 +1,8 @@
+---
+- name: "Start Certbot for Nginx"
+  become: true
+  script: "start_certbot.sh {{ app_host_name }} {{ app_smtp_from }}"
+  retries: 3
+  delay: 10
+  register: start_certbot_result
+  until: start_certbot_result.rc == 0

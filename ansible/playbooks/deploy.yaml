@@ -115,9 +115,10 @@
     deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
 #    - name: Upgrade operating system to latest version. Enable automatic security updates.
-    - name: Install https certificate tooling
+    - name: Install Certbot
       include_role:
         name: certbot
+        tasks_from: install
     - name: Install Nginx
       include_role:
         name: nginx
@@ -209,12 +210,9 @@
         url: "http://{{ app_host_name }}"
         timeout: 5
     - name: "Start Certbot for Nginx"
-      become: true
-      script: "start_certbot.sh {{ app_host_name }}"
-      retries: 3
-      delay: 10
-      register: start_certbot_result
-      until: start_certbot_result.rc == 0
+      include_role:
+        name: certbot
+        tasks_from: start
 - hosts: local
   gather_facts: false
   become: false

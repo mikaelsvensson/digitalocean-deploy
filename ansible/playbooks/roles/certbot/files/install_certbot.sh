@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-add-apt-repository -y ppa:certbot/certbot
-apt -y -qq install python-certbot-nginx
+apt -y update
+apt -y -qq install certbot python3-certbot-nginx

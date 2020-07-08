@@ -1,7 +1,7 @@
 ---
-- name: certbot - Install Certbot
+- name: Install Certbot
   script: install_certbot.sh
-- name: certbot - Schedule certificate renewal
+- name: Schedule certificate renewal
   copy:
     src: renew_cert.sh
     dest: "/etc/cron.daily/renew_nginx_cert"
