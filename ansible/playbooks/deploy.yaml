@@ -163,6 +163,14 @@
     - name: Create database backup
       command: "sudo -u postgres pg_dump -U postgres {{ app_db_name }} -F p -f /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
       become: yes
+    - name: Create Let's Encrypt backup
+#      -z: filter the archive through gzip
+#      -p: extract information about file permissions (default for superuser)
+#      -c: create a new archive
+#      -v: verbosely list files
+#      -f: archive file
+      command: "sudo tar -zpcvf /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /etc/letsencrypt/"
+      become: yes
 
 - hosts: digitalocean
   gather_facts: false
@@ -185,6 +193,15 @@
     - name: If other Droplet exists; Fetch database backup
       command: "scp {{ old_droplet_ip }}:/tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql /tmp/"
       become: no
+      when: old_droplet_ip != ''
+    - name: If other Droplet exists; Fetch Let's Encrypt backup
+      command: "scp {{ old_droplet_ip }}:/tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /tmp/"
+      become: no
+      when: old_droplet_ip != ''
+    - name: If other Droplet exists; Extract Let's Encrypt backup
+      # Source: https://community.letsencrypt.org/t/move-to-another-server/77985/4
+      command: "sudo tar -zxvf /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz -C /"
+      become: yes
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Restore database from backup
       shell: "sudo -u postgres psql {{ app_db_name }} < /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
@@ -223,17 +240,6 @@
       uri:
         url: "https://{{ app_host_name }}"
         timeout: 5
-#    - name: Point DNS to new Droplet.
-#      uri:
-#        url: "http://api.dynu.com/nic/update?hostname=minamarken.dynu.net&myip={{ do_droplet.droplet.ip_address }}"
-#        user: "{{ dynu_user }}"
-#        password: "{{ dynu_password }}"
-#        method: GET
-#        force_basic_auth: yes
-#        return_content: yes
-#      register: dynu_updated_response
-#    - debug:
-#        msg: "{{ dynu_updated_response }}"
 #    - name: Wait for DNS change to be propagated, e.g. by waiting for "TTL seconds" (which I believe is 90 seconds for Dynu DNS names)
     - name: If other Droplet exists; Delete old Droplet.
       when: old_droplet_ip != ''

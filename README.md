@@ -47,4 +47,13 @@ Connect to Droplet over SSH and the run this command (connects to "app" database
 
 ## Helpful Links
 
+Ansible
+
 https://docs.ansible.com/ansible/2.5/modules/list_of_cloud_modules.html?highlight=digital_ocean
+
+Let's Encrypt
+
+https://certbot.eff.org/docs/using.html#certbot-command-line-options
+https://ivanderevianko.com/2019/03/migrate-letsencrypt-certificates-certbot-to-new-server
+https://community.letsencrypt.org/t/move-to-another-server/77985/5
+https://community.letsencrypt.org/t/best-way-to-migrate-and-create-letsencrypt-certs-on-new-server/77311
