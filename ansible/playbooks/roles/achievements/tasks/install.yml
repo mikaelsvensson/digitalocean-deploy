@@ -11,7 +11,7 @@
     state: directory
 - name: "Extract site bundle"
   unarchive:
-    src: "./temp/achievements-{{ deploy_id }}.tar.gz"
+    src: "./temp-achievements/achievements-{{ deploy_id }}.tar.gz"
     dest: "/home/{{ digitalocean_sudo_user }}/achievements-bundle"
 - name: "Copy script"
   template:

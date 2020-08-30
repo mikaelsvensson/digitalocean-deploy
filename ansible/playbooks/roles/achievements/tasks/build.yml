@@ -1,60 +1,60 @@
 ---
 - name: "[Prepare build] Remove temp directory"
   file:
-    path: ./temp
+    path: ./temp-achievements
     state: absent
 
 - name: "[Prepare build] Get application source code"
   git:
     repo: https://github.com/mikaelsvensson/achievements.git
-    dest: ./temp/achievements
+    dest: ./temp-achievements/achievements
     force: yes
 
 - name: "[Prepare build] Download Node dependencies"
   shell:
     cmd: "npm install"
-    chdir: ./temp/achievements/gui-application
+    chdir: ./temp-achievements/achievements/gui-application
 
 - name: "[Build] Build the frontend"
   shell:
     cmd: "npm run build:production"
-    chdir: ./temp/achievements/gui-application
+    chdir: ./temp-achievements/achievements/gui-application
   environment:
     API_HOST: "https://{{ app_host_name }}"
 
 - name: "[Build] Build the backend"
   shell: "mvn clean install"
   args:
-    chdir: ./temp/achievements
+    chdir: ./temp-achievements/achievements
 
 - name: "[Bundle] Copy frontend"
   copy:
-    src: ./temp/achievements/gui-application/build/
-    dest: ./temp/bundle/gui
+    src: ./temp-achievements/achievements/gui-application/build/
+    dest: ./temp-achievements/bundle/gui
 
 - name: "[Bundle] Create target folder"
   file:
-    path: ./temp/bundle/server
+    path: ./temp-achievements/bundle/server
     state: directory
 
 - name: "[Bundle] Generate script for starting application"
   template:
     src: ./templates/start_achievements.sh
-    dest: ./temp/bundle/server/start.sh
+    dest: ./temp-achievements/bundle/server/start.sh
     mode: u=rwx,g=r,o=r
 
 - name: "[Bundle] Copy backend app"
   copy:
-    src: ./temp/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
-    dest: ./temp/bundle/server/achievements-service.jar
+    src: ./temp-achievements/achievements/server-application/target/server-application-1.0-SNAPSHOT.jar
+    dest: ./temp-achievements/bundle/server/achievements-service.jar
 
 - name: "[Bundle] Copy backend configuration file"
   copy:
-    src: ./temp/achievements/server-application/environments/heroku.yaml
-    dest: ./temp/bundle/server/config.yml
+    src: ./temp-achievements/achievements/server-application/environments/heroku.yaml
+    dest: ./temp-achievements/bundle/server/config.yml
 
 - name: "[Bundle] Create archive"
   archive:
     path:
-      - ./temp/bundle/*
-    dest: "./temp/achievements-{{ deploy_id }}.tar.gz"
+      - ./temp-achievements/bundle/*
+    dest: "./temp-achievements/achievements-{{ deploy_id }}.tar.gz"

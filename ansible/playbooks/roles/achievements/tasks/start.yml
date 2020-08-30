@@ -1,4 +1,7 @@
 ---
+- name: Run database init script
+  command: "sudo -u postgres psql postgres -f /tmp/init_app_database.sql"
+  become: yes
 - name: Start service
   shell:
     cmd: "./start.sh"
