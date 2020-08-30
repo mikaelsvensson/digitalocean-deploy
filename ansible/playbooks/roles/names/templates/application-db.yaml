@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: "{{ names_jdbc_database_url }}"
+    username: "{{ names_db_user_name }}"
+    password: "{{ names_db_user_pw }}"

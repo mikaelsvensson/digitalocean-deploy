@@ -18,6 +18,11 @@
       include_role:
         name: achievements
         tasks_from: build
+    - name: Build application Names
+      when: do_build is undefined or do_build|bool
+      include_role:
+        name: names
+        tasks_from: build
     - name: Get information about distributions
       uri:
         url: https://api.digitalocean.com/v2/images?page=1&per_page=1000&type=distribution
@@ -132,6 +137,10 @@
       include_role:
         name: achievements
         tasks_from: install
+    - name: Install Names server
+      include_role:
+        name: names
+        tasks_from: install
     - name: Generate SSH key for user
       become: no
       command: "ssh-keygen -t rsa -f ~/.ssh/id_rsa -b 4096 -N {{ '' | quote }}"
@@ -210,6 +219,10 @@
     - name: Start Achievements server
       include_role:
         name: achievements
+        tasks_from: start
+    - name: Start Names server
+      include_role:
+        name: names
         tasks_from: start
 #    - name: Open firewall to allow http, https and ssh to the Droplet.
 #    - name: Send status mail

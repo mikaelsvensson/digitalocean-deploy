@@ -1,0 +1,89 @@
+---
+
+#
+# Prepare
+#
+
+- name: "[Prepare build] Remove temp directory"
+  file:
+    path: ./temp-names
+    state: absent
+
+#
+# Back-end
+#
+
+- name: "[Prepare build] Get application source code"
+  git:
+    repo: https://github.com/mikaelsvensson/names-backend.git
+    dest: ./temp-names/names-backend
+    force: yes
+
+- name: "[Build] Build the backend"
+  shell: "mvn clean package"
+  args:
+    chdir: ./temp-names/names-backend
+
+- name: "[Bundle] Create target folder"
+  file:
+    path: ./temp-names/names-bundle/server
+    state: directory
+
+- name: "[Bundle] Generate script for starting application"
+  template:
+    src: ./templates/start_names.sh
+    dest: ./temp-names/names-bundle/server/start.sh
+    mode: u=rwx,g=r,o=r
+
+- name: "[Bundle] Copy backend app"
+  copy:
+    src: ./temp-names/names-backend/names-backend-service/target/names-backend-service-0.0.1-SNAPSHOT.jar
+    dest: ./temp-names/names-bundle/server/names-service.jar
+
+- name: "[Bundle] Copy backend configuration file (main)"
+  template:
+    src: ./templates/application.yaml
+    dest: ./temp-names/names-bundle/server/application.yaml
+    mode: u=rwx,g=r,o=r
+- name: "[Bundle] Copy backend configuration file (database)"
+  template:
+    src: ./templates/application-db.yaml
+    dest: ./temp-names/names-bundle/server/application-db.yaml
+    mode: u=rwx,g=r,o=r
+
+#
+# Front-end
+#
+
+- name: "[Prepare build] Get application source code"
+  git:
+    repo: https://github.com/mikaelsvensson/names-frontend.git
+    dest: ./temp-names/names-frontend
+    force: yes
+
+- name: "[Prepare build] Download Node dependencies"
+  shell:
+    cmd: "yarn"
+    chdir: ./temp-names/names-frontend
+
+- name: "[Build] Build the frontend"
+  shell:
+    cmd: "yarn build"
+    chdir: ./temp-names/names-frontend
+  environment:
+    VUE_APP_BASE_URL: "http://{{ names_host_name }}"
+
+- name: "[Bundle] Copy frontend"
+  copy:
+    src: ./temp-names/names-frontend/dist/
+    dest: ./temp-names/names-bundle/gui
+
+#
+# Bundle everything
+#
+
+- name: "[Bundle] Create archive"
+  archive:
+    path:
+      - ./temp-names/names-bundle/*
+    dest: "./temp-names/names-{{ deploy_id }}.tar.gz"
