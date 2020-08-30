@@ -7,7 +7,7 @@
 
 BACKUP_DIR=/home/{{ digitalocean_sudo_user }}/database-backups
 DAYS_TO_KEEP=14
-DATABASE={{ app_db_name }}
+DATABASE={{ item.db_name }}
 SUFFIX=.sql
 USER=postgres
 TIMESTAMP=$(date +"%Y%m%d%H%M")

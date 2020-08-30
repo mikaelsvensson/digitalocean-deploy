@@ -161,7 +161,7 @@
     - name: Enable user on new Droplet to connect to the old Droplet using new user's SSH key
       shell: "echo {{ new_droplet_user_key | quote }} >> ~/.ssh/authorized_keys"
     - name: Create database backup
-      command: "sudo -u postgres pg_dump -U postgres {{ app_db_name }} -F p -f /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
+      command: "sudo -u postgres pg_dumpall --username=postgres --file=/tmp/redeploy_backup_{{ deploy_id }}.sql"
       become: yes
     - name: Create Let's Encrypt backup
 #      -z: filter the archive through gzip
@@ -169,7 +169,7 @@
 #      -c: create a new archive
 #      -v: verbosely list files
 #      -f: archive file
-      command: "sudo tar -zpcvf /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /etc/letsencrypt/"
+      command: "sudo tar -zpcvf /tmp/redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /etc/letsencrypt/"
       become: yes
 
 - hosts: digitalocean
@@ -191,20 +191,20 @@
       become: no
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Fetch database backup
-      command: "scp {{ old_droplet_ip }}:/tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql /tmp/"
+      command: "scp {{ old_droplet_ip }}:/tmp/redeploy_backup_{{ deploy_id }}.sql /tmp/"
       become: no
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Fetch Let's Encrypt backup
-      command: "scp {{ old_droplet_ip }}:/tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /tmp/"
+      command: "scp {{ old_droplet_ip }}:/tmp/redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz /tmp/"
       become: no
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Extract Let's Encrypt backup
       # Source: https://community.letsencrypt.org/t/move-to-another-server/77985/4
-      command: "sudo tar -zxvf /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz -C /"
+      command: "sudo tar -zxvf /tmp/redeploy_backup_{{ deploy_id }}_letsencrypt.tar.gz -C /"
       become: yes
       when: old_droplet_ip != ''
     - name: If other Droplet exists; Restore database from backup
-      shell: "sudo -u postgres psql {{ app_db_name }} < /tmp/{{ app_db_name }}_redeploy_backup_{{ deploy_id }}.sql"
+      shell: "sudo -u postgres psql -f /tmp/redeploy_backup_{{ deploy_id }}.sql postgres"
       become: yes
       when: old_droplet_ip != ''
     - name: Start Achievements server

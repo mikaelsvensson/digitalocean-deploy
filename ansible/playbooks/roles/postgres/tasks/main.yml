@@ -1,9 +1,12 @@
 ---
-- name: Postgres - Copy script for setting up database
+- name: Postgres - Copy script for setting up databases
   template:
-    src: init_app_database.sql
-    dest: /tmp/init_app_database.sql
+    src: init_database.sql
+    dest: "/tmp/init_{{ item.db_name }}_database.sql"
     mode: 0666
+  loop:
+    - { db_name: "{{ app_db_name }}", db_user_name: "{{ app_db_user_name }}", db_user_pw: "{{ app_db_user_pw }}" }
+    - { db_name: "{{ names_db_name }}", db_user_name: "{{ names_db_user_name }}", db_user_pw: "{{ names_db_user_pw }}" }
 - name: Postgres - Install
   script: install_postgres.sh
 - name: Postgres - Create backup directory
@@ -16,5 +19,8 @@
 - name: Postgres - Setup daily backups
   template:
     src: backup_database.sh
-    dest: "/etc/cron.daily/backup_{{ app_db_name }}_database"
+    dest: "/etc/cron.daily/backup_{{ item.db_name }}_database"
     mode: 0755
+  loop:
+    - { db_name: "{{ app_db_name }}" }
+    - { db_name: "{{ names_db_name }}" }

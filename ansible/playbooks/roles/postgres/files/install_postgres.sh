@@ -16,6 +16,4 @@ if [ $? -ne 0 ]; then
 
     sudo -u postgres /usr/lib/postgresql/9.6/bin/pg_ctl -D /var/lib/postgresql/9.6/main -l logfile start
 
-    sudo -u postgres psql postgres -f /tmp/init_app_database.sql
-
 fi
