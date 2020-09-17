@@ -4,3 +4,6 @@ spring:
       - db
 server:
   port: "{{ names_port }}"
+
+actions:
+  qrUrlTemplate: "http://namn.mikaelsvensson.info/#/{actionId}"
