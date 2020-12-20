@@ -6,4 +6,10 @@ server:
   port: "{{ names_port }}"
 
 actions:
-  qrUrlTemplate: "http://namn.mikaelsvensson.info/#/{actionId}"
+  qrUrlTemplate: "https://namn.mikaelsvensson.info/#/{actionId}"
+
+jwt:
+  secret: "{{ names_jwt_secret }}"
+
+facebook:
+  secret: "{{ names_facebook_secret }}"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 APP_HOST_NAME=$1
 APP_SMTP_FROM=$2
+NAMES_HOST_NAME=$3
 
 # --redirect         Automatically redirect all HTTP traffic to HTTPS.
 # --agree-tos        Agree to the ACME Subscriber Agreement.
@@ -16,7 +17,8 @@ certbot \
   --agree-tos \
   --email "$APP_SMTP_FROM" \
   --no-eff-email \
-  --domains "$APP_HOST_NAME" \
+  --expand \
+  --domains "$APP_HOST_NAME,$NAMES_HOST_NAME" \
   --reinstall
 
 # TODO: Create backup of /etc/letsencrypt (where generated certificates and config is stored)

@@ -28,6 +28,8 @@ names_host_name: namn.mikaelsvensson.info
 names_db_name: names
 names_db_user_name: names
 names_db_user_pw: "{{ vault_names_db_user_pw }}"
+names_jwt_secret: "{{ vault_names_jwt_secret }}"
+names_facebook_secret: "{{ vault_names_facebook_secret }}"
 names_jdbc_database_url: jdbc:postgresql://localhost:5432/names
 names_port: 8082
 dynu_user: "{{ vault_dynu_user }}"

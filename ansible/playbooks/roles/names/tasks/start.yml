@@ -19,16 +19,18 @@
 #  register: admin_api_url_check
 #  until: admin_api_url_check['status']|default(0) == 200
 
-#- name: "Wait for public API to become available over http:8080"
-#  become: no
-#  uri:
-#    url: "http://localhost:8080/api/stats"
-#    timeout: 1
-#    status_code: [401]
-#  retries: 1
-#  delay: 5
-#  register: public_api_url_check
-#  until: public_api_url_check['status']|default(0) == 401 # Yes, 401 is expected but at least it's a proper response
+- name: "Wait for public API to become available over http:{{ names_port }}"
+  become: no
+  uri:
+    url: "http://localhost:{{ names_port }}/actions/fake-action-boot-test/invocation"
+    method: POST
+    timeout: 1
+    status_code: [404]
+  retries: 5
+  delay: 5
+  register: names_api_url_check
+  # Checking for 404 is not the ideal test but at least it verifies that the application is running and is connected to the database.
+  until: names_api_url_check['status']|default(0) == 404
 
 #- name: "Check if API is available over http:80 (proxied through Nginx)"
 #  become: no

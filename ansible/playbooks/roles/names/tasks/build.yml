@@ -71,7 +71,7 @@
     cmd: "yarn build"
     chdir: ./temp-names/names-frontend
   environment:
-    VUE_APP_BASE_URL: "http://{{ names_host_name }}"
+    VUE_APP_BASE_URL: "https://{{ names_host_name }}"
 
 - name: "[Bundle] Copy frontend"
   copy:
