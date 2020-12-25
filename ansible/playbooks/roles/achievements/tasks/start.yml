@@ -32,7 +32,7 @@
     timeout: 1
     status_code: [200]
   retries: 10
-  delay: 5
+  delay: 10
   register: admin_api_url_check
   until: admin_api_url_check['status']|default(0) == 200
 

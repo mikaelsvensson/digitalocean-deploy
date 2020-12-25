@@ -20,6 +20,9 @@ BASE_URI_SERVER=https://$APP_HOST_NAME \
 BASE_URI_GUI=https://$APP_HOST_NAME \
 nohup \
   java \
+    -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xmx300M -Xlog:gc \
     -Dsentry.environment=production \
     -jar achievements-service.jar \
     server config.yml > service.log 2>&1 &
+
+# Documentation for ZGC (The Z Garbage Collector): https://wiki.openjdk.java.net/display/zgc/Main

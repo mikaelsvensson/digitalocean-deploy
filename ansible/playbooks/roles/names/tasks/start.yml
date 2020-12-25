@@ -26,8 +26,8 @@
     method: POST
     timeout: 1
     status_code: [404]
-  retries: 5
-  delay: 5
+  retries: 10
+  delay: 10
   register: names_api_url_check
   # Checking for 404 is not the ideal test but at least it verifies that the application is running and is connected to the database.
   until: names_api_url_check['status']|default(0) == 404
