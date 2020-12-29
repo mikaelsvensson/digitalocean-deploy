@@ -1,12 +1,9 @@
 ---
-- name: Run database init script
-  command: "sudo -u postgres psql postgres -f /tmp/init_names_database.sql"
-  become: yes
 - name: Start service
-  shell:
-    cmd: "./start.sh"
-    chdir: "./names-bundle/server"
-  become: no
+  systemd:
+    state: started
+    name: names
+    daemon_reload: yes
 
 #- name: "Wait for admin API to become available over http:9001"
 #  become: no

@@ -13,6 +13,26 @@
   unarchive:
     src: "./temp-achievements/achievements-{{ deploy_id }}.tar.gz"
     dest: "/home/{{ digitalocean_sudo_user }}/achievements-bundle"
+
+# Credits: https://computingforgeeks.com/how-to-run-java-jar-application-with-systemd-on-linux/
+- name: Create user group for service
+  group:
+    name: achievements
+    system: yes
+- name: Create user for service
+  user:
+    name: achievements
+    system: yes
+    shell: /bin/false
+    create_home: no
+    group: achievements
+- name: Set service configuration
+  template:
+    src: achievements_service.conf
+    dest: "/etc/systemd/system/achievements.service"
+    mode: u=rw,g=r,o=r
+  become: yes
+
 - name: "Copy script"
   template:
     src: prepare_files.sh
@@ -23,4 +43,8 @@
   become: yes
 - name: Nginx - Restart
   command: "sudo systemctl restart nginx"
+  become: yes
+
+- name: Run database init script
+  command: "sudo -u postgres psql postgres -f /tmp/init_app_database.sql"
   become: yes
