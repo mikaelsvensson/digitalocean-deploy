@@ -19,7 +19,10 @@ SENTRY_DSN="{{ app_sentry_dsn }}" \
 BASE_URI_SERVER="https://{{ app_host_name }}" \
 BASE_URI_GUI="https://{{ app_host_name }}" \
 /usr/bin/java \
-    -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xmx300M -Xlog:gc \
+  -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:ZUncommitDelay=30 -Xlog:gc -Xms16M -Xmx192M \
+  -Ddw.database.initialSize=2 \
+  -Ddw.database.minSize=2 \
+  -Ddw.database.maxSize=4 \
   -Dsentry.environment=production \
   -jar achievements-service.jar \
   server config.yml > service.log 2>&1

@@ -1,4 +1,10 @@
 spring:
+  type: com.zaxxer.hikari.HikariDataSource
+  hikari:
+    pool-name: names-db-connection-pool
+    maximum-pool-size: 4
+    max-lifetime: 1800000
+    idle-timeout: 30000
   datasource:
     url: "{{ names_jdbc_database_url }}"
     username: "{{ names_db_user_name }}"

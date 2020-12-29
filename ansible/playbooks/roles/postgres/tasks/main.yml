@@ -7,6 +7,11 @@
   loop:
     - { db_name: "{{ app_db_name }}", db_user_name: "{{ app_db_user_name }}", db_user_pw: "{{ app_db_user_pw }}" }
     - { db_name: "{{ names_db_name }}", db_user_name: "{{ names_db_user_name }}", db_user_pw: "{{ names_db_user_pw }}" }
+- name: Postgres - Copy configuration
+  template:
+    src: postgresql.conf
+    dest: "/tmp/postgresql.conf"
+    mode: 0644
 - name: Postgres - Install
   script: install_postgres.sh
 - name: Postgres - Create backup directory
