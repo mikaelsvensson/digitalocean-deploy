@@ -1,0 +1,4 @@
+mailgun:
+  from: "{{ names_mailgun_from }}"
+  endpoint: "https://api.eu.mailgun.net/v3/namn.mikaelsvensson.info/messages"
+  apiKey: "{{ names_mailgun_apikey }}"

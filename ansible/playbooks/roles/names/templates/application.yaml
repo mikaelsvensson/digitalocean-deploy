@@ -2,14 +2,28 @@ spring:
   profiles:
     active:
       - db
+      - email-mailgun
+      - metrics-report
+
 server:
   port: "{{ names_port }}"
 
 actions:
   qrUrlTemplate: "https://namn.mikaelsvensson.info/#/{actionId}"
+  verifyEmailUrlTemplate: "https://namn.mikaelsvensson.info/#/{actionId}"
 
 jwt:
   secret: "{{ names_jwt_secret }}"
 
 facebook:
   secret: "{{ names_facebook_secret }}"
+
+admin:
+  testMail:
+    to: "{{ names_admin_testmail_recipient }}"
+  user:
+    username: "{{ names_admin_username }}"
+    password: "{{ names_admin_password }}"
+
+recommender:
+  unigramConsidered: true

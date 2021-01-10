@@ -40,16 +40,16 @@
     src: ./temp-names/names-backend/names-backend-service/target/names-backend-service-0.0.1-SNAPSHOT.jar
     dest: ./temp-names/names-bundle/server/names-service.jar
 
-- name: "[Bundle] Copy backend configuration file (main)"
+- name: "[Bundle] Copy backend configuration file {{ item }}"
   template:
-    src: ./templates/application.yaml
-    dest: ./temp-names/names-bundle/server/application.yaml
+    src: "./templates/{{ item }}.yaml"
+    dest: "./temp-names/names-bundle/server/{{ item }}.yaml"
     mode: u=rwx,g=r,o=r
-- name: "[Bundle] Copy backend configuration file (database)"
-  template:
-    src: ./templates/application-db.yaml
-    dest: ./temp-names/names-bundle/server/application-db.yaml
-    mode: u=rwx,g=r,o=r
+  loop:
+    - "application"
+    - "application-db"
+    - "application-email-mailgun"
+    - "application-metrics-report"
 
 #
 # Front-end

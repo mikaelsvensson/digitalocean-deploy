@@ -33,6 +33,12 @@ names_db_user_pw: "{{ vault_names_db_user_pw }}"
 names_jwt_secret: "{{ vault_names_jwt_secret }}"
 names_facebook_secret: "{{ vault_names_facebook_secret }}"
 names_jdbc_database_url: jdbc:postgresql://localhost:5432/names
+names_metrics_report_recipient: "{{ vault_names_metrics_report_recipient }}"
+names_mailgun_from: "{{ vault_names_mailgun_from }}"
+names_mailgun_apikey: "{{ vault_names_mailgun_apikey }}"
+names_admin_testmail_recipient: "{{ vault_names_admin_testmail_recipient }}"
+names_admin_username: "{{ vault_names_admin_username }}"
+names_admin_password: "{{ vault_names_admin_password }}"
 names_port: 8082
 dynu_user: "{{ vault_dynu_user }}"
 dynu_password: "{{ vault_dynu_password }}"
