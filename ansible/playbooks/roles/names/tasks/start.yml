@@ -5,29 +5,19 @@
     name: names
     daemon_reload: yes
 
-#- name: "Wait for admin API to become available over http:9001"
-#  become: no
-#  uri:
-#    url: "http://localhost:9001/ping"
-#    timeout: 1
-#    status_code: [200]
-#  retries: 10
-#  delay: 5
-#  register: admin_api_url_check
-#  until: admin_api_url_check['status']|default(0) == 200
-
-- name: "Wait for public API to become available over http:{{ names_port }}"
+- name: "Wait for API to become available over http:{{ names_port }}"
   become: no
   uri:
-    url: "http://localhost:{{ names_port }}/actions/fake-action-boot-test/invocation"
-    method: POST
+    url: "http://localhost:{{ names_port }}/admin/ping"
+    user: "{{ names_admin_username }}"
+    password: "{{ names_admin_password }}"
+    force_basic_auth: yes
     timeout: 1
-    status_code: [404]
+    status_code: 204
   retries: 10
   delay: 10
   register: names_api_url_check
-  # Checking for 404 is not the ideal test but at least it verifies that the application is running and is connected to the database.
-  until: names_api_url_check['status']|default(0) == 404
+  until: names_api_url_check.status == 204
 
 #- name: "Check if API is available over http:80 (proxied through Nginx)"
 #  become: no
