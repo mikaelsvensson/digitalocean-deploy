@@ -25,6 +25,6 @@ BASE_URI_GUI="https://{{ app_host_name }}" \
   -Ddw.database.maxSize=4 \
   -Dsentry.environment=production \
   -jar achievements-service.jar \
-  server config.yml > service.log 2>&1
+  server config.yml >> service.log 2>&1
 
 # Documentation for ZGC (The Z Garbage Collector): https://wiki.openjdk.java.net/display/zgc/Main
