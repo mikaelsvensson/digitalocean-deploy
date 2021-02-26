@@ -5,6 +5,7 @@ IS_BOOTING=$1
   -jar names-service.jar \
   --spring.liquibase.enabled=$IS_BOOTING \
   --scbImporter.onStart=$IS_BOOTING \
+  --ssaImporter.onStart=$IS_BOOTING \
   --syllableUpdater.onStart=$IS_BOOTING >> service.log 2>&1
 
 # Documentation for ZGC (The Z Garbage Collector): https://wiki.openjdk.java.net/display/zgc/Main
