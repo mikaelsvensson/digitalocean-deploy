@@ -40,7 +40,7 @@
     src: ./temp-names/names-backend/names-backend-service/target/names-backend-service-0.0.1-SNAPSHOT.jar
     dest: ./temp-names/names-bundle/server/names-service.jar
 
-- name: "[Bundle] Copy backend configuration file {{ item }}"
+- name: "[Bundle] Copy backend configuration files"
   template:
     src: "./templates/{{ item }}.yaml"
     dest: "./temp-names/names-bundle/server/{{ item }}.yaml"
