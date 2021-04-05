@@ -61,18 +61,18 @@
         msg: "Image slug for newest Ubuntu distribution is {{ digitalocean_image_id }}"
 
     - name: Create Droplet from image provided by Digital Ocean.
-      digital_ocean:
+      community.digitalocean.digital_ocean_droplet:
         state: present
-        api_token: "{{ digitalocean_api_key }}"
-        backups_enabled: no
-        image_id: "{{ digitalocean_image_id }}"
+        oauth_token: "{{ digitalocean_api_key }}"
+        backups: no
+        image: "{{ digitalocean_image_id }}"
         ipv6: no
         name: "default-{{ deploy_id }}"
         unique_name: yes
-        private_networking: yes
-        region_id: "{{ digitalocean_region }}"
-        size_id: "{{ digitalocean_size_id }}"
-        ssh_key_ids: "{{ digitalocean_ssh_pub_keys }}"
+        private_networking: no
+        region: "{{ digitalocean_region }}"
+        size: "{{ digitalocean_size_id }}"
+        ssh_keys: "{{ digitalocean_ssh_pub_keys }}"
         wait: yes
         wait_timeout: 300
         user_data: "{{ lookup('template', 'files/initial_server_setup.sh') }}"
@@ -80,20 +80,20 @@
 
     - name: Read id of new Droplet
       set_fact:
-        new_droplet_id: "{{ do_droplet.droplet.id }}"
+        new_droplet_id: "{{ do_droplet.data.droplet.id }}"
     - name: Wait for SSH to become available
       pause:
         seconds: 30
     # Source: https://stackoverflow.com/a/35213839
     - name: Remove new Droplet's IP address from list of known hosts in case that address has previous been used by other Droplet
-      shell: "ssh-keygen -R {{ do_droplet.droplet.networks.v4[1].ip_address }}"
+      shell: "ssh-keygen -R {{ do_droplet.data.ip_address }}"
 
     - name: Add SSH fingerprint of new Droplet to list of known hosts
-      shell: "ssh-keyscan {{ do_droplet.droplet.networks.v4[1].ip_address }} >> {{ ssh_known_hosts_file }}"
+      shell: "ssh-keyscan {{ do_droplet.data.ip_address }} >> {{ ssh_known_hosts_file }}"
 
     - name: Add host for new Droplet
       add_host:
-        hostname: "{{ do_droplet.droplet.networks.v4[1].ip_address }}"
+        hostname: "{{ do_droplet.data.ip_address }}"
         groupname: digitalocean
 
 - hosts: digitalocean
@@ -210,7 +210,7 @@
       when:
         - not do_keep_old|bool
         - floating_ip_droplet_id != ''
-      digital_ocean:
-        state: deleted
-        api_token: "{{ digitalocean_api_key }}"
+      community.digitalocean.digital_ocean_droplet:
+        state: absent
+        oauth_token: "{{ digitalocean_api_key }}"
         id: "{{ floating_ip_droplet_id }}"

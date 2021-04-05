@@ -24,6 +24,10 @@ Documentation: https://docs.ansible.com/ansible/latest/installation_guide/intro_
 
     `$ pip install boto3`
 
+0. Install dopy (required for Digital Ocean)
+
+    `$ pip install dopy`
+
 See https://github.com/ansible/ansible-modules-core/issues/2509 for more information on the specific Python instructions.
 
 ## Deploying to Digital Ocean
@@ -53,6 +57,7 @@ Or add these command-line arguments to the commands:
     $ ansible-playbook build-new.yml 
     $ ansible-playbook backup-current.yml 
     $ ansible-playbook --extra-vars "build_id=GET_ID_FROM_PREVIOUS_COMMAND backup_id=GET_ID_FROM_PREVIOUS_COMMAND" deploy-new.yml 
+    "msg": "build_id is 20210405181419-i69cdqtzZW. deploy_id is 20210405181941-blxkVWDdQ0. backup_id is 20210405181913-87eybfnI3j."
 
 ## Common tasks
 
