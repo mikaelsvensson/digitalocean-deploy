@@ -1,0 +1,14 @@
+- name: AWS CLI - Config folder
+  file:
+    path: /root/.aws
+    state: directory
+  become: yes
+- name: AWS CLI - Set credentials for root
+  template:
+    src: "root/.aws/config"
+    dest: "/root/.aws/config"
+    mode: u=r,g=,o=
+  become: yes
+- name: AWS CLI - Install
+  script: install_aws_cli.sh
+  become: yes

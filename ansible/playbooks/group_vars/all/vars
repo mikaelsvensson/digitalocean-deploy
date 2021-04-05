@@ -9,6 +9,9 @@ digitalocean_floating_ip: 174.138.106.188
 ansible_become_pass: "{{ vault_digitalocean_sudo_password }}"
 database_memory_mb: 384
 database_connection_count: 12
+aws_region: eu-north-1
+aws_access_key_id: "{{ vault_aws_access_key_id }}"
+aws_secret_access_key: "{{ vault_aws_secret_access_key }}"
 app_db_name: app
 app_db_user_name: app
 app_db_user_pw: "{{ vault_app_db_user_pw }}"
