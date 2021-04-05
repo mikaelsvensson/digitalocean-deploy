@@ -26,5 +26,7 @@ gzip -f $OUTPUT_FILE
 
 chown {{ digitalocean_sudo_user }} ${OUTPUT_FILE}.gz
 
+sudo aws s3 cp ${OUTPUT_FILE}.gz s3://mikaelsvensson.info-digitalocean.backup/${FILE}.gz
+
 # prune old backups
 find $BACKUP_DIR -maxdepth 1 -mtime +$DAYS_TO_KEEP -name "*${SUFFIX}.gz" -exec rm -rf '{}' ';'
