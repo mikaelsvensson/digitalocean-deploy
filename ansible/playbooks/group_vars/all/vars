@@ -43,5 +43,3 @@ names_admin_testmail_recipient: "{{ vault_names_admin_testmail_recipient }}"
 names_admin_username: "{{ vault_names_admin_username }}"
 names_admin_password: "{{ vault_names_admin_password }}"
 names_port: 8082
-dynu_user: "{{ vault_dynu_user }}"
-dynu_password: "{{ vault_dynu_password }}"
