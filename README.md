@@ -2,26 +2,94 @@
 
 ## Getting Started
 
+### Installing Ansible
+
+Documentation: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
 0. Get Ansible Vault encryption key from a developer.
-0. Install Node 8 (or at least not version 10 because the Achievements application cannot be compiled with Node 10).
-0. Install Python 2.
-0. Install version 0.3.5 of the Python library `dopy` using `pip install -I dopy==0.3.5`.
-0. Install the Python library `six` using `pip install six`.
-0. Install Ansible using `pip install ansible`.
-0. Install jmespath using `pip install jmespath`.
-0. Optional: Install `doctl` from https://github.com/digitalocean/doctl
+
+0. Install Python 3 in virtual Python environment
+
+    `$ virtualenv -p /usr/local/bin/python3.8 .venv-digitalocean`
+
+0. Activate the virtual environment
+   
+   `$ source .venv-digitalocean/bin/activate`
+
+0. Install Ansible
+
+    `$ pip install ansible`
+
+0. Install boto3 (required for AWS S3 uploads)
+
+    `$ pip install boto3`
 
 See https://github.com/ansible/ansible-modules-core/issues/2509 for more information on the specific Python instructions.
 
 ## Deploying to Digital Ocean
 
-    $ cd ansible/playbooks/
-    $ ansible-playbook \
-        --vault-password-file=/PATH/TO/VAULT/PASSWORD.txt \
-        --key-file=/PATH/TO/SSH/KEY/CONFIGURED/IN/DIGITALOCEAN/ACCOUNT \
-        deploy.yaml 
+### Specifying SSH key file and vault password file
 
-## Useful doctl Commands
+Either add this to `ansible/ansible.cfg`:
+
+    private_key_file = /PATH/TO/SSH/KEY/CONFIGURED/IN/DIGITALOCEAN/ACCOUNT
+    vault_password_file = /PATH/TO/VAULT/PASSWORD.txt
+    
+Or add these command-line arguments to the commands:
+
+    --key-file=/PATH/TO/SSH/KEY/CONFIGURED/IN/DIGITALOCEAN/ACCOUNT
+    --vault-password-file=/PATH/TO/VAULT/PASSWORD.txt
+
+### All-in-one command
+
+    $ source .venv-digitalocean/bin/activate
+    $ cd ansible/playbooks/
+    $ ansible-playbook full-redeploy.yaml 
+
+### Step-by-step commands
+
+    $ source .venv-digitalocean/bin/activate
+    $ cd ansible/playbooks/
+    $ ansible-playbook build-new.yml 
+    $ ansible-playbook backup-current.yml 
+    $ ansible-playbook --extra-vars "build_id=GET_ID_FROM_PREVIOUS_COMMAND backup_id=GET_ID_FROM_PREVIOUS_COMMAND" deploy-new.yml 
+
+## Common tasks
+
+### Reading credentials
+
+    $ cd ansible/playbooks/
+    $ ansible-vault view group_vars/all/vault
+
+### Connecting to server
+
+    $ ssh mikaelsvensson@minamarken.mikaelsvensson.info
+    
+Connection rejected because of changed ip address? No problem:
+    
+    $ ssh-keygen -R minamarken.mikaelsvensson.info
+
+### Connecting to database
+
+Connect to Droplet over SSH and the run this command (connects to "app" database as user "app"):
+
+    $ psql -U app -h 127.0.0.1 app
+
+### Download database backups
+
+    $ scp mikaelsvensson@minamarken.mikaelsvensson.info:database-backups/* database-backups/
+    
+### Clear Liquibase change log lock
+
+Connect to Droplet over SSH and do this:
+
+    $ sudo -u postgres psql names
+    names=# SELECT * FROM DATABASECHANGELOGLOCK;
+    names=# UPDATE DATABASECHANGELOGLOCK SET LOCKED=false, LOCKGRANTED=null, LOCKEDBY=null WHERE ID=1;
+
+## Using the Digital Ocean CLI
+
+Installation: See https://github.com/digitalocean/doctl.
 
 Set or test credentials:
 
@@ -38,12 +106,6 @@ List Droplet sizes:
 List Droplet regions:
 
     $ doctl compute region list
-
-## Connecting to database
-
-Connect to Droplet over SSH and the run this command (connects to "app" database as user "app"):
-
-    $ psql -U app -h 127.0.0.1 app
 
 ## Helpful Links
 

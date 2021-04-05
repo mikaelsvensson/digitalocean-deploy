@@ -1,0 +1,7 @@
+---
+- name: Build
+  import_playbook: build-new.yml
+- name: Back-up
+  import_playbook: backup-current.yml
+- name: Redeploy
+  import_playbook: deploy-new.yml

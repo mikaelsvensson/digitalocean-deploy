@@ -57,4 +57,4 @@
   archive:
     path:
       - ./temp-achievements/bundle/*
-    dest: "./temp-achievements/achievements-{{ deploy_id }}.tar.gz"
+    dest: "./temp-achievements/achievements-{{ build_id }}.tar.gz"

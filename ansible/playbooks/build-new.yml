@@ -1,0 +1,33 @@
+---
+- hosts: local
+  gather_facts: false
+  become: false
+  vars:
+    date_slug_cmd: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+    random_string_cmd: "{{ lookup('password', '/dev/null length=10 chars=ascii_letters,digits') }}"
+  tasks:
+    - name: Set build_id
+      when: build_id is undefined # build_id might have been defined using command-line argument
+      set_fact:
+        build_id: "{{ date_slug_cmd }}-{{ random_string_cmd }}"
+    - debug:
+        msg: "build_id is {{ build_id }}"
+    - name: Build application
+      when: do_build is undefined or do_build|bool
+      loop:
+        - achievements
+        - names
+      include_role:
+        name: "{{ item }}"
+        tasks_from: build
+    - name: Upload package
+      loop:
+        - achievements
+        - names
+      aws_s3:
+        aws_access_key: "{{ aws_access_key_id }}"
+        aws_secret_key: "{{ aws_secret_access_key }}"
+        bucket: mikaelsvensson.info-digitalocean.deploy
+        object: "deploy-{{ build_id }}/{{ item }}-{{ build_id }}.tar.gz"
+        src: "./temp-{{ item }}/{{ item }}-{{ build_id }}.tar.gz"
+        mode: put

@@ -86,4 +86,4 @@
   archive:
     path:
       - ./temp-names/names-bundle/*
-    dest: "./temp-names/names-{{ deploy_id }}.tar.gz"
+    dest: "./temp-names/names-{{ build_id }}.tar.gz"
