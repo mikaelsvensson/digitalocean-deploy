@@ -12,42 +12,6 @@
         backup_id: "{{ date_slug_cmd }}-{{ random_string_cmd }}"
     - debug:
         msg: "backup_id is {{ backup_id }}"
-#    - name: Get information about floating IP
-#      uri:
-#        url: "https://api.digitalocean.com/v2/floating_ips/{{ digitalocean_floating_ip }}"
-#        method: GET
-#        headers:
-#          Authorization: "Bearer {{ digitalocean_api_key }}"
-#          Content-Type: "application/json"
-#      register: floating_ip
-
-    #    - name: Print stuff
-    #      debug:
-    #        msg: "{{ floating_ip }}"
-
-#    - name: Get id of Droplet currently assigned to floating IP
-#      set_fact:
-#        floating_ip_droplet_id: "{{ floating_ip  | json_query('json.floating_ip.droplet.id') }}"
-
-#    - debug:
-#        msg: "Floating IP {{ digitalocean_floating_ip }} is currently assigned to Droplet {{ floating_ip_droplet_id }}"
-
-#    - name: Read IP addresses of existing Droplet
-#      set_fact:
-#        backup_id: "{{ backup_id }}"
-#        old_droplet_id: "{{ existing_droplets | json_query('json.droplets[0].id') }}"
-#        old_droplet_ip: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`private`].ip_address') | first }}"
-#        old_droplet_ip_public: "{{ existing_droplets | json_query('json.droplets[0].networks.v4[?type==`public`].ip_address') | first }}"
-#      when: existing_droplets.json.meta.total > 0
-
-#    - debug:
-#        msg: "Internal IP address of pre-existing Droplet (id {{ old_droplet_id }}) is {{ old_droplet_ip }} and the public is {{ old_droplet_ip_public }}"
-#      when: old_droplet_ip is defined
-
-    # Source: https://stackoverflow.com/a/35213839
-#    - name: Add SSH fingerprint of old (pre-existing) Droplet to list of known hosts
-#      shell: "ssh-keyscan {{ old_droplet_ip_public }} >> {{ ssh_known_hosts_file }}"
-#      when: old_droplet_ip is defined
 
     - name: Add host for old Droplet
       add_host:
@@ -85,6 +49,6 @@
       command: "sudo tar -zpcvf /tmp/redeploy_backup_{{ backup_id }}_homedirectory.tar.gz /home/{{ digitalocean_sudo_user }}/"
       become: yes
     - name: Upload backups
-      command: "sudo aws s3 cp /tmp/ s3://mikaelsvensson.info-digitalocean.deploy/deploy-{{ backup_id }}/ --recursive --exclude '*' --include 'redeploy_backup_{{ backup_id }}*'"
+      command: "sudo aws s3 cp /tmp/ s3://mikaelsvensson.info-digitalocean.deploy/backup-{{ backup_id }}/ --recursive --exclude '*' --include 'redeploy_backup_{{ backup_id }}*'"
       become: yes
 
