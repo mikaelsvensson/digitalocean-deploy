@@ -120,6 +120,9 @@
     deploy_id: "{{ hostvars[groups['local'][0]].deploy_id }}"
   tasks:
 #    - name: Upgrade operating system to latest version. Enable automatic security updates.
+    - name: Update package cache
+      command: apt update
+      become: yes
     - name: Install DigitalOcean Monitoring agent
       include_role:
         name: digitalocean-agent

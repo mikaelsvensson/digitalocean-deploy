@@ -4,9 +4,6 @@
 dpkg -s nginx &> /dev/null
 if [ $? -ne 0 ]; then
 
-    # TODO: Don't update the apt cache for every package installed!
-    apt update
-
     # No, nginx is not installed. Install it now.
     apt -y -qq install nginx
 fi

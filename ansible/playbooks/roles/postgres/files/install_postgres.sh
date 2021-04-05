@@ -6,7 +6,6 @@ if [ $? -ne 0 ]; then
 
     add-apt-repository --yes "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main"
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-    # TODO: Don't update the apt cache for every package installed!
     apt-get update
 
     # No, Postgresql is not installed. Install it now.
