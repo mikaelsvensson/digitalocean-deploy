@@ -19,7 +19,7 @@ SENTRY_DSN="{{ app_sentry_dsn }}" \
 BASE_URI_SERVER="https://{{ app_host_name }}" \
 BASE_URI_GUI="https://{{ app_host_name }}" \
 /usr/bin/java \
-  -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:ZUncommitDelay=30 -Xlog:gc -Xms16M -Xmx192M \
+  -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -XX:ZUncommitDelay=30 -Xlog:gc -Xms16M -Xmx128M \
   -Ddw.database.initialSize=2 \
   -Ddw.database.minSize=2 \
   -Ddw.database.maxSize=4 \
