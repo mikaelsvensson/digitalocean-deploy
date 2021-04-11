@@ -145,7 +145,7 @@
 #        msg: "{{ new_droplet_user_key }}"
 
     - name: If other Droplet exists; Fetch backups
-      command: "sudo aws s3 cp s3://mikaelsvensson.info-digitalocean.deploy/backup-{{ backup_id }}/ /tmp/ --recursive"
+      command: "sudo aws s3 cp s3://mikaelsvensson.info-digitalocean.deploy/{{ backup_id }}-backup/ /tmp/ --recursive"
       become: yes
       when: backup_id != ''
     - name: If other Droplet exists; Extract Let's Encrypt backup

@@ -10,7 +10,7 @@
     path: "/home/{{ digitalocean_sudo_user }}/achievements-bundle"
     state: directory
 - name: Fetch package
-  command: "sudo aws s3 cp s3://mikaelsvensson.info-digitalocean.deploy/build-{{ build_id }}/achievements-{{ build_id }}.tar.gz /home/{{ digitalocean_sudo_user }}/achievements-{{ build_id }}.tar.gz"
+  command: "sudo aws s3 cp s3://mikaelsvensson.info-digitalocean.deploy/{{ build_id }}-build/achievements-{{ build_id }}.tar.gz /home/{{ digitalocean_sudo_user }}/achievements-{{ build_id }}.tar.gz"
   become: yes
 - name: "Extract site bundle"
   command: "tar -zxvf /home/{{ digitalocean_sudo_user }}/achievements-{{ build_id }}.tar.gz -C /home/{{ digitalocean_sudo_user }}/achievements-bundle"

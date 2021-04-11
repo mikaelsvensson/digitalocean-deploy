@@ -49,6 +49,6 @@
       command: "sudo tar -zpcvf /tmp/redeploy_backup_{{ backup_id }}_homedirectory.tar.gz /home/{{ digitalocean_sudo_user }}/"
       become: yes
     - name: Upload backups
-      command: "sudo aws s3 cp /tmp/ s3://mikaelsvensson.info-digitalocean.deploy/backup-{{ backup_id }}/ --recursive --exclude '*' --include 'redeploy_backup_{{ backup_id }}*'"
+      command: "sudo aws s3 cp /tmp/ s3://mikaelsvensson.info-digitalocean.deploy/{{ backup_id }}-backup/ --recursive --exclude '*' --include 'redeploy_backup_{{ backup_id }}*'"
       become: yes
 

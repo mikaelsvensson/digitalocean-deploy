@@ -28,6 +28,6 @@
         aws_access_key: "{{ aws_access_key_id }}"
         aws_secret_key: "{{ aws_secret_access_key }}"
         bucket: mikaelsvensson.info-digitalocean.deploy
-        object: "build-{{ build_id }}/{{ item }}-{{ build_id }}.tar.gz"
+        object: "{{ build_id }}-build/{{ item }}-{{ build_id }}.tar.gz"
         src: "./temp-{{ item }}/{{ item }}-{{ build_id }}.tar.gz"
         mode: put
