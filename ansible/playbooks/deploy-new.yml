@@ -81,12 +81,17 @@
     - name: Read id of new Droplet
       set_fact:
         new_droplet_id: "{{ do_droplet.data.droplet.id }}"
-    - name: Wait for SSH to become available
-      pause:
-        seconds: 30
     # Source: https://stackoverflow.com/a/35213839
     - name: Remove new Droplet's IP address from list of known hosts in case that address has previous been used by other Droplet
       shell: "ssh-keygen -R {{ do_droplet.data.ip_address }}"
+
+    # Source: https://groups.google.com/g/ansible-project/c/fVpSZtFwjss?pli=1
+    - name: Wait for SSH to become available
+      command: "ssh-keyscan {{ do_droplet.data.ip_address }}"
+      register: result
+      until: result.rc == 0
+      retries: 5
+      delay: 15
 
     - name: Add SSH fingerprint of new Droplet to list of known hosts
       shell: "ssh-keyscan {{ do_droplet.data.ip_address }} >> {{ ssh_known_hosts_file }}"
@@ -95,6 +100,13 @@
       add_host:
         hostname: "{{ do_droplet.data.ip_address }}"
         groupname: digitalocean
+
+    - name: Connect via SSH
+      command: "ssh {{ digitalocean_sudo_user }}@{{ do_droplet.data.ip_address }} \"echo Connected\""
+      retries: 14
+      delay: 15
+      register: verify_ssh_connection
+      until: verify_ssh_connection is not failed
 
 - hosts: digitalocean
   gather_facts: false
