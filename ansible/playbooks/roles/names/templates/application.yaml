@@ -17,6 +17,8 @@ jwt:
 
 facebook:
   secret: "{{ names_facebook_secret }}"
+  deleteDataCallbackUrlTemplate: "https://namn.mikaelsvensson.info/profile/delete-facebook-data-request/{actionId}"
+  deleteDataStatusUrlTemplate: "https://namn.mikaelsvensson.info/#/{actionId}"
 
 admin:
   testMail:
